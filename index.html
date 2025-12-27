@@ -4,241 +4,132 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#000000">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <title>tapper app</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            margin: 0; padding: 0; box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            touch-action: manipulation;
+            user-select: none; touch-action: none;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background: #0f0f0f;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* Рамка профиля */
-        .header {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 100;
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            max-width: calc(100% - 40px);
-        }
-
-        .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 1.5px solid #007AFF;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-
-        .username {
-            color: #ffffff;
-            font-size: 15px;
-            font-weight: 590;
-            letter-spacing: -0.3px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Счетчик */
-        .counter-container {
-            padding: 10px 25px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            margin-bottom: 30px;
-        }
-
-        .counter {
-            color: #ffffff;
-            font-size: 36px;
-            font-weight: 700;
-            letter-spacing: -1px;
-            text-align: center;
-        }
-
-        .game-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-            width: 100%;
-            padding: 20px;
-        }
-
-        /* Главная кнопка */
-        .button-border-outer {
-            padding: 10px;
-            border: 1px dashed rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            margin-bottom: 20px;
-        }
-
-        .click-button {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: #1a1a1a;
-            border: 4px solid #1c1c1e;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            animation: rotate 25s linear infinite;
-            z-index: 20;
-            box-shadow: 0 0 30px rgba(0, 122, 255, 0.2), inset 0 0 20px rgba(0, 0, 0, 0.8);
-            transition: transform 0.05s;
-        }
-
-        .click-button:active {
-            transform: scale(0.92);
-        }
-
-        .heart-icon {
-            width: 60px;
-            height: 60px;
-            fill: #007AFF;
-            filter: drop-shadow(0 0 5px rgba(0, 122, 255, 0.5));
-            pointer-events: none;
-        }
-
-        /* Стамина */
-        .stamina-wrapper {
-            width: 220px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .stamina-text {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            letter-spacing: 0.5px;
-        }
-
-        .stamina-bar-container {
-            padding: 4px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-        }
-
-        .stamina-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .stamina-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #007AFF, #00C6FF);
-            box-shadow: 0 0 10px rgba(0, 122, 255, 0.5);
-            border-radius: 4px;
-            transition: width 0.2s ease-out;
-            width: 100%;
-        }
-
-        /* Кнопки улучшений */
-        .upgrades-row {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 220px;
-        }
-
-        .upgrade-button {
-            background: transparent;
-            color: #007AFF;
-            border: 1px solid #007AFF;
-            border-radius: 12px;
-            padding: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-transform: lowercase;
-            width: 100%;
-        }
-
-        .upgrade-button:active { transform: scale(0.96); background: rgba(0, 122, 255, 0.1); }
-        .upgrade-button:disabled { border-color: #333; color: #555; cursor: not-allowed; }
-
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* Белый эффект клика */
-        .plus-one {
-            position: absolute;
-            color: #ffffff;
-            font-size: 32px;
-            font-weight: 800;
-            pointer-events: none;
-            z-index: 30;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
-            animation: floatUp 0.8s ease-out forwards;
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-120px) scale(1.5); }
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: #0f0f0f; color: white;
+            min-height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; overflow: hidden;
+            /* Сильная перспектива для мощного 3D */
+            perspective: 500px;
         }
 
         /* Авторизация */
         .auth-modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000;
-            display: flex; align-items: center; justify-content: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; display: flex; align-items: center; justify-content: center;
             z-index: 1000;
         }
         .auth-modal.hidden { display: none; }
         .auth-content {
-            background: #111;
-            border: 1px solid #222;
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            width: 85%;
-            max-width: 320px;
+            background: #111; border: 1px solid #222; border-radius: 20px;
+            padding: 40px; text-align: center; width: 85%; max-width: 320px;
         }
         .auth-button { 
             background: #007AFF; color: white; border: none; 
             border-radius: 12px; padding: 16px; width: 100%; 
-            font-weight: 600; font-size: 17px;
+            font-weight: 600; font-size: 17px; cursor: pointer;
+        }
+
+        /* Профиль */
+        .header {
+            position: absolute; top: 20px; left: 20px;
+            display: inline-flex; align-items: center; gap: 12px;
+            padding: 8px 16px; background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+        }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid #007AFF; }
+        .username { font-size: 15px; font-weight: 590; color: #fff; }
+
+        /* Счетчик */
+        .counter-container {
+            padding: 10px 25px; background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        .counter { font-size: 36px; font-weight: 700; }
+
+        /* Игровая зона */
+        .button-area {
+            position: relative; display: flex; align-items: center; justify-content: center;
+        }
+
+        .button-border-outer {
+            padding: 12px;
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .click-button {
+            width: 200px; height: 200px; border-radius: 50%;
+            background: #1a1a1a; border: 4px solid #1c1c1e;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 122, 255, 0.1);
+            
+            /* Желейный возврат */
+            transition: transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.4);
+            
+            transform-style: preserve-3d;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .click-button.is-moving {
+            transition: transform 0.1s ease-out;
+        }
+
+        .heart-icon {
+            width: 65px; height: 65px; fill: #007AFF;
+            filter: drop-shadow(0 0 8px rgba(0, 122, 255, 0.5));
+            pointer-events: none; 
+            /* Сильный параллакс для иконки */
+            transform: translateZ(60px); 
+        }
+
+        /* Стамина */
+        .stamina-wrapper { width: 220px; margin: 25px 0; text-align: center; }
+        .stamina-text { color: rgba(255, 255, 255, 0.6); font-size: 14px; margin-bottom: 8px; font-weight: 600; }
+        .stamina-bar {
+            width: 100%; height: 8px; background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);
+        }
+        .stamina-fill {
+            height: 100%; background: linear-gradient(90deg, #007AFF, #00C6FF);
+            width: 100%; transition: width 0.2s ease-out;
+        }
+
+        /* Кнопки улучшений */
+        .upgrades-row { display: flex; flex-direction: column; gap: 10px; width: 220px; }
+        .upgrade-button {
+            background: transparent; color: #007AFF; border: 1px solid #007AFF;
+            border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: all 0.1s; text-transform: lowercase;
+        }
+        .upgrade-button:active { transform: scale(0.96); background: rgba(0, 122, 255, 0.1); }
+        .upgrade-button:disabled { border-color: #333; color: #555; cursor: not-allowed; }
+
+        .plus-one {
+            position: absolute; color: #ffffff; font-size: 32px; font-weight: 800;
+            pointer-events: none; z-index: 100; text-shadow: 0 0 15px rgba(255,255,255,0.6);
+            animation: floatUp 0.7s ease-out forwards;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-120px) scale(1.5); }
         }
     </style>
 </head>
 <body>
+
     <div id="authModal" class="auth-modal">
         <div class="auth-content">
             <h2 style="color:white; margin-bottom:20px; font-weight:600;">tapper app</h2>
@@ -246,231 +137,127 @@
         </div>
     </div>
 
-    <div class="header" id="profileBox">
-        <img id="userAvatar" class="avatar" src="https://via.placeholder.com/36" alt="A">
+    <div class="header">
+        <img id="userAvatar" class="avatar" src="https://via.placeholder.com/36">
         <div id="username" class="username">загрузка...</div>
     </div>
 
-    <div class="game-container">
-        <div class="counter-container">
-            <div class="counter" id="clickCount">0</div>
-        </div>
+    <div class="counter-container">
+        <div class="counter" id="clickCount">0</div>
+    </div>
 
+    <div class="button-area">
         <div class="button-border-outer">
-            <button id="clickButton" class="click-button">
+            <div id="clickButton" class="click-button">
                 <svg class="heart-icon" viewBox="0 0 24 24">
                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                 </svg>
-            </button>
-        </div>
-
-        <div class="stamina-wrapper">
-            <div class="stamina-text" id="staminaText">300 / 300</div>
-            <div class="stamina-bar-container">
-                <div class="stamina-bar">
-                    <div id="staminaFill" class="stamina-fill"></div>
-                </div>
             </div>
         </div>
+    </div>
 
-        <div class="upgrades-row">
-            <button id="upgradeClickBtn" class="upgrade-button">улучшить клик (500)</button>
-            <button id="upgradeStaminaBtn" class="upgrade-button">улучшить стамину (1000)</button>
+    <div class="stamina-wrapper">
+        <div class="stamina-text" id="staminaText">... / ...</div>
+        <div class="stamina-bar">
+            <div id="staminaFill" class="stamina-fill"></div>
         </div>
+    </div>
+
+    <div class="upgrades-row">
+        <button id="upgradeClickBtn" class="upgrade-button">улучшить клик</button>
+        <button id="upgradeStaminaBtn" class="upgrade-button">улучшить стамину</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        let clickCount = 0;
-        let clickLevel = 0;
-        let clicksPerClick = 1;
-        let staminaLevel = 0;
-        let maxStamina = 300;
-        let stamina = 300;
-        const RECOVERY_PER_SECOND = 3.33; 
-        const clickUpgradePrices = [500, 1500, 5000, 15000, 50000];
-        const staminaUpgradePrices = [1000, 3000, 7000, 20000, 60000];
+        let gameState = JSON.parse(localStorage.getItem('tapper_save_v7')) || {
+            clicks: 0, clickLvl: 0, staminaLvl: 0, currentStamina: 300, lastSave: Date.now()
+        };
 
-        function initApp() {
-            if (tg) {
-                tg.ready();
-                tg.expand();
-                // Настройка темы
-                tg.setHeaderColor('#000000');
-                tg.setBackgroundColor('#0f0f0f');
-            }
-            if (localStorage.getItem('auth') || (tg.initDataUnsafe && tg.initDataUnsafe.user)) {
-                document.getElementById('authModal').classList.add('hidden');
-                localStorage.setItem('auth', 'true');
-                loadUserData();
-            }
-            loadGameData();
-            setInterval(updateStaminaLogic, 1000);
-        }
-
-        function loadUserData() {
-            const user = tg.initDataUnsafe?.user;
-            if (user) {
-                document.getElementById('username').textContent = (user.username || user.first_name).toLowerCase();
-                if (user.photo_url) document.getElementById('userAvatar').src = user.photo_url;
-            } else {
-                document.getElementById('username').textContent = "гость";
-            }
-        }
-
-        function loadGameData() {
-            clickCount = parseInt(localStorage.getItem('clicks')) || 0;
-            clickLevel = parseInt(localStorage.getItem('clickLvl')) || 0;
-            staminaLevel = parseInt(localStorage.getItem('staminaLvl')) || 0;
-            clicksPerClick = 1 + clickLevel;
-            maxStamina = 300 + (staminaLevel * 100);
-
-            const savedStamina = localStorage.getItem('stmn');
-            const savedTime = localStorage.getItem('time');
-            if (savedStamina && savedTime) {
-                const passed = (Date.now() - parseInt(savedTime)) / 1000;
-                stamina = Math.min(maxStamina, parseFloat(savedStamina) + (passed * RECOVERY_PER_SECOND));
-            } else {
-                stamina = maxStamina;
-            }
-            updateUI();
-        }
-
-        function saveGameData() {
-            localStorage.setItem('clicks', clickCount);
-            localStorage.setItem('clickLvl', clickLevel);
-            localStorage.setItem('staminaLvl', staminaLevel);
-            localStorage.setItem('stmn', stamina);
-            localStorage.setItem('time', Date.now());
-        }
+        const CLICK_PRICES = [500, 1500, 5000, 15000, 50000];
+        const STAMINA_PRICES = [1000, 3000, 7000, 20000, 60000];
+        const btn = document.getElementById('clickButton');
+        let isTouching = false;
 
         function updateUI() {
-            document.getElementById('clickCount').textContent = Math.floor(clickCount).toLocaleString();
+            const maxSt = 300 + (gameState.staminaLvl * 100);
+            document.getElementById('clickCount').textContent = Math.floor(gameState.clicks).toLocaleString();
+            document.getElementById('staminaText').textContent = `${Math.floor(gameState.currentStamina)} / ${maxSt}`;
+            document.getElementById('staminaFill').style.width = (gameState.currentStamina / maxSt * 100) + '%';
             
-            const upgClickBtn = document.getElementById('upgradeClickBtn');
-            if (clickLevel < clickUpgradePrices.length) {
-                upgClickBtn.textContent = `улучшить клик (${clickUpgradePrices[clickLevel]})`;
-                upgClickBtn.disabled = clickCount < clickUpgradePrices[clickLevel];
-            } else {
-                upgClickBtn.textContent = "клик макс. lvl";
-                upgClickBtn.disabled = true;
-            }
-
-            const upgStaminaBtn = document.getElementById('upgradeStaminaBtn');
-            if (staminaLevel < staminaUpgradePrices.length) {
-                upgStaminaBtn.textContent = `улучшить стамину (${staminaUpgradePrices[staminaLevel]})`;
-                upgStaminaBtn.disabled = clickCount < staminaUpgradePrices[staminaLevel];
-            } else {
-                upgStaminaBtn.textContent = "стамина макс. lvl";
-                upgStaminaBtn.disabled = true;
-            }
-            updateStaminaDisplay();
+            const cp = CLICK_PRICES[gameState.clickLvl];
+            const sp = STAMINA_PRICES[gameState.staminaLvl];
+            document.getElementById('upgradeClickBtn').textContent = cp ? `улучшить клик (${cp})` : "макс";
+            document.getElementById('upgradeStaminaBtn').textContent = sp ? `улучшить стамину (${sp})` : "макс";
         }
 
-        function updateStaminaDisplay() {
-            document.getElementById('staminaText').textContent = `${Math.floor(stamina)} / ${maxStamina}`;
-            document.getElementById('staminaFill').style.width = (stamina / maxStamina * 100) + '%';
+        function updateTilt(e) {
+            if (!isTouching) return;
+            btn.classList.add('is-moving');
+            const rect = btn.getBoundingClientRect();
+            const t = e.touches ? e.touches[0] : e;
+            
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            
+            const dx = (t.clientX - centerX) / (window.innerWidth / 2);
+            const dy = (t.clientY - centerY) / (window.innerHeight / 2);
+
+            // МОЩНЫЙ НАКЛОН (50 градусов)
+            const rx = dy * -50;
+            const ry = dx * 50;
+
+            btn.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) scale(0.92) translate3d(${dx*20}px, ${dy*20}px, 0)`;
         }
 
-        function updateStaminaLogic() {
-            if (stamina < maxStamina) {
-                stamina = Math.min(maxStamina, stamina + RECOVERY_PER_SECOND);
-            }
-            updateStaminaDisplay();
-            localStorage.setItem('stmn', stamina);
-            localStorage.setItem('time', Date.now());
-        }
-
-        function handleClick(e) {
+        function handleStart(e) {
             if (e.cancelable) e.preventDefault();
-            if (stamina < 1) {
-                // Вибрация ошибки (два коротких)
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-                return;
+            isTouching = true;
+
+            if (gameState.currentStamina >= 1) {
+                gameState.clicks += (1 + gameState.clickLvl);
+                gameState.currentStamina -= 1;
+                
+                const t = e.touches ? e.touches[0] : e;
+                const plus = document.createElement('div');
+                plus.className = 'plus-one';
+                plus.textContent = `+${1 + gameState.clickLvl}`;
+                plus.style.left = `${t.clientX - 20}px`;
+                plus.style.top = `${t.clientY - 40}px`;
+                document.body.appendChild(plus);
+                setTimeout(() => plus.remove(), 700);
+
+                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+                updateUI();
             }
-            
-            stamina -= 1;
-            clickCount += clicksPerClick;
-            
-            updateUI();
-            saveGameData();
-            showPlusEffect(e);
-            
-            // ОСНОВНАЯ ВИБРАЦИЯ КЛИКА
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('light'); 
-            } else if (navigator.vibrate) {
-                navigator.vibrate(40);
-            }
+            updateTilt(e);
         }
 
-        function showPlusEffect(e) {
-            const plus = document.createElement('div');
-            plus.className = 'plus-one';
-            plus.textContent = `+${clicksPerClick}`;
-            
-            let x, y;
-            if (e.touches && e.touches.length > 0) {
-                x = e.touches[0].clientX;
-                y = e.touches[0].clientY;
-            } else if (e.changedTouches && e.changedTouches.length > 0) {
-                x = e.changedTouches[0].clientX;
-                y = e.changedTouches[0].clientY;
-            } else {
-                x = e.clientX;
-                y = e.clientY;
-            }
-            
-            plus.style.left = (x - 20) + 'px';
-            plus.style.top = (y - 40) + 'px';
-            
-            document.body.appendChild(plus);
-            setTimeout(() => plus.remove(), 800);
+        function handleEnd() {
+            isTouching = false;
+            btn.classList.remove('is-moving');
+            btn.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1) translate3d(0,0,0)';
         }
 
-        const btn = document.getElementById('clickButton');
+        btn.addEventListener('touchstart', handleStart, { passive: false });
+        window.addEventListener('touchmove', (e) => { if(isTouching) updateTilt(e); }, { passive: false });
+        window.addEventListener('touchend', handleEnd);
 
-        btn.addEventListener('touchstart', (e) => {
-            handleClick(e);
-        }, { passive: false });
-
-        btn.addEventListener('mousedown', (e) => {
-            if (!('ontouchstart' in window)) {
-                handleClick(e);
-            }
-        });
-
-        document.getElementById('upgradeClickBtn').addEventListener('click', () => {
-            const price = clickUpgradePrices[clickLevel];
-            if (clickCount >= price) {
-                clickCount -= price;
-                clickLevel++;
-                clicksPerClick++;
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                updateUI();
-                saveGameData();
-            }
-        });
-
-        document.getElementById('upgradeStaminaBtn').addEventListener('click', () => {
-            const price = staminaUpgradePrices[staminaLevel];
-            if (clickCount >= price) {
-                clickCount -= price;
-                staminaLevel++;
-                maxStamina += 100;
-                stamina = maxStamina;
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                updateUI();
-                saveGameData();
-            }
-        });
-
-        document.getElementById('authButton').addEventListener('click', () => {
-            localStorage.setItem('auth', 'true');
+        document.getElementById('authButton').onclick = () => {
+            localStorage.setItem('auth_done', 'true');
             location.reload();
-        });
+        };
 
-        initApp();
+        if (localStorage.getItem('auth_done')) document.getElementById('authModal').classList.add('hidden');
+
+        setInterval(() => {
+            const max = 300 + (gameState.staminaLvl * 100);
+            if (gameState.currentStamina < max) gameState.currentStamina = Math.min(max, gameState.currentStamina + 3);
+            updateUI();
+            localStorage.setItem('tapper_save_v7', JSON.stringify(gameState));
+        }, 1000);
+
+        updateUI();
     </script>
 </body>
 </html>
