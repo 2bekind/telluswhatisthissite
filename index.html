@@ -2,11 +2,11 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <title>telluswhatisthissite</title>
+    <title>tapper app</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -15,6 +15,7 @@
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
+            touch-action: manipulation;
         }
 
         body {
@@ -29,44 +30,59 @@
             position: relative;
         }
 
-        /* Header с юзернеймом и аватаркой */
+        /* Рамка профиля */
         .header {
             position: absolute;
             top: 20px;
             left: 20px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 12px;
             z-index: 100;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            max-width: calc(100% - 40px);
         }
 
         .avatar {
-            width: 44px;
-            height: 44px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            border: none;
+            border: 1.5px solid #007AFF;
             object-fit: cover;
-            background: rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
         }
 
         .username {
             color: #ffffff;
-            font-size: 17px;
+            font-size: 15px;
             font-weight: 590;
-            letter-spacing: -0.4px;
+            letter-spacing: -0.3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        /* Счетчик над кнопкой */
+        /* Счетчик */
+        .counter-container {
+            padding: 10px 25px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
         .counter {
             color: #ffffff;
-            font-size: 32px;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-            margin-bottom: 20px;
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -1px;
             text-align: center;
         }
 
-        /* Контейнер для игры */
         .game-container {
             display: flex;
             flex-direction: column;
@@ -75,683 +91,386 @@
             flex: 1;
             width: 100%;
             padding: 20px;
-            position: relative;
         }
 
-        /* Изображение по центру */
-        .center-image {
+        /* Главная кнопка */
+        .button-border-outer {
+            padding: 10px;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            margin-bottom: 20px;
+        }
+
+        .click-button {
             width: 200px;
             height: 200px;
-            object-fit: contain;
-            margin-bottom: 40px;
-            z-index: 10;
-        }
-
-        /* Кнопка-диск */
-        .click-button {
-            width: 220px;
-            height: 220px;
             border-radius: 50%;
             background: #1a1a1a;
-            border: none;
+            border: 4px solid #1c1c1e;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            transition: opacity 0.1s;
-            animation: rotate 20s linear infinite;
+            animation: rotate 25s linear infinite;
             z-index: 20;
-            -webkit-tap-highlight-color: transparent;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0, 122, 255, 0.15);
+            box-shadow: 0 0 30px rgba(0, 122, 255, 0.2), inset 0 0 20px rgba(0, 0, 0, 0.8);
+            transition: transform 0.05s;
         }
 
-        .click-button img {
-            display: none;
+        .click-button:active {
+            transform: scale(0.92);
         }
 
         .heart-icon {
             width: 60px;
             height: 60px;
-            fill: rgba(255, 255, 255, 0.6);
+            fill: #007AFF;
+            filter: drop-shadow(0 0 5px rgba(0, 122, 255, 0.5));
             pointer-events: none;
         }
 
-        .click-button.disabled {
-            opacity: 0.5;
-            filter: grayscale(100%);
-            cursor: not-allowed;
-            animation: none;
+        /* Стамина */
+        .stamina-wrapper {
+            width: 220px;
+            margin-bottom: 20px;
+            text-align: center;
         }
 
-        /* Стамина */
-        .stamina-container {
-            position: relative;
-            width: 220px;
-            margin-bottom: 8px;
+        .stamina-text {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .stamina-bar-container {
+            padding: 4px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
         }
 
         .stamina-bar {
             width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
             overflow: hidden;
         }
 
         .stamina-fill {
             height: 100%;
-            background: #007AFF;
-            border-radius: 2px;
-            transition: width 0.3s ease;
+            background: linear-gradient(90deg, #007AFF, #00C6FF);
+            box-shadow: 0 0 10px rgba(0, 122, 255, 0.5);
+            border-radius: 4px;
+            transition: width 0.2s ease-out;
             width: 100%;
         }
 
-        /* Кнопка улучшить */
-        .upgrade-button {
-            background: #007AFF;
-            color: #ffffff;
-            border: none;
-            border-radius: 10px;
-            padding: 12px 24px;
-            font-size: 17px;
-            font-weight: 590;
-            cursor: pointer;
-            transition: opacity 0.15s, transform 0.1s;
-            letter-spacing: -0.3px;
-            margin-top: 16px;
+        /* Кнопки улучшений */
+        .upgrades-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
             width: 220px;
         }
 
-        .upgrade-button:active {
-            transform: scale(0.97);
-            opacity: 0.7;
-        }
-
-        .upgrade-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Кнопка гость */
-        .guest-button {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            border: none;
-            border-radius: 10px;
-            padding: 14px 32px;
-            font-size: 17px;
-            font-weight: 590;
+        .upgrade-button {
+            background: transparent;
+            color: #007AFF;
+            border: 1px solid #007AFF;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.15s, transform 0.1s;
-            letter-spacing: -0.3px;
+            transition: all 0.2s;
+            text-transform: lowercase;
             width: 100%;
-            margin-top: 12px;
         }
 
-        .guest-button:active {
-            transform: scale(0.97);
-            opacity: 0.7;
-        }
+        .upgrade-button:active { transform: scale(0.96); background: rgba(0, 122, 255, 0.1); }
+        .upgrade-button:disabled { border-color: #333; color: #555; cursor: not-allowed; }
 
-        @keyframes rotate {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .click-button:active {
-            opacity: 0.8;
-        }
-
-        .click-button.holding {
-            opacity: 0.7;
-        }
-
-        /* Эффект +1 */
+        /* Белый эффект клика */
         .plus-one {
             position: absolute;
             color: #ffffff;
-            font-size: 28px;
-            font-weight: 600;
+            font-size: 32px;
+            font-weight: 800;
             pointer-events: none;
             z-index: 30;
-            animation: floatUp 1s ease-out forwards;
-            letter-spacing: -0.5px;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+            animation: floatUp 0.8s ease-out forwards;
         }
 
         @keyframes floatUp {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-100px) scale(1.5);
-            }
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-120px) scale(1.5); }
         }
 
-        /* Футер */
-        .footer {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 13px;
-            text-align: center;
-            z-index: 100;
-            font-weight: 400;
-            letter-spacing: -0.2px;
-        }
-
-        /* Модальное окно авторизации */
+        /* Авторизация */
         .auth-modal {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            display: flex; align-items: center; justify-content: center;
             z-index: 1000;
-            padding: 20px;
         }
-
-        .auth-modal.hidden {
-            display: none;
-        }
-
+        .auth-modal.hidden { display: none; }
         .auth-content {
-            background: #1c1c1e;
-            border-radius: 14px;
-            padding: 40px 30px;
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 20px;
+            padding: 40px;
             text-align: center;
-            max-width: 300px;
-            width: 100%;
-            border: 0.5px solid rgba(255, 255, 255, 0.1);
+            width: 85%;
+            max-width: 320px;
         }
-
-        .auth-title {
-            color: #ffffff;
-            font-size: 22px;
-            margin-bottom: 24px;
-            font-weight: 600;
-            letter-spacing: -0.4px;
-            text-transform: lowercase;
-        }
-
-        .auth-button {
-            background: #007AFF;
-            color: #ffffff;
-            border: none;
-            border-radius: 10px;
-            padding: 14px 32px;
-            font-size: 17px;
-            font-weight: 590;
-            cursor: pointer;
-            transition: opacity 0.15s, transform 0.1s;
-            letter-spacing: -0.3px;
-            width: 100%;
-        }
-
-        .auth-button:active {
-            transform: scale(0.97);
-            opacity: 0.7;
+        .auth-button { 
+            background: #007AFF; color: white; border: none; 
+            border-radius: 12px; padding: 16px; width: 100%; 
+            font-weight: 600; font-size: 17px;
         }
     </style>
 </head>
 <body>
-    <!-- Модальное окно авторизации -->
     <div id="authModal" class="auth-modal">
         <div class="auth-content">
-            <div class="auth-title">добро пожаловать!</div>
-            <button id="authButton" class="auth-button">войти</button>
-            <button id="guestButton" class="guest-button">гость</button>
+            <h2 style="color:white; margin-bottom:20px; font-weight:600;">tapper app</h2>
+            <button id="authButton" class="auth-button">войти через tg</button>
         </div>
     </div>
 
-    <!-- Header -->
-    <div class="header">
-        <img id="userAvatar" class="avatar" src="" alt="Avatar">
-        <div id="username" class="username">гость</div>
+    <div class="header" id="profileBox">
+        <img id="userAvatar" class="avatar" src="https://via.placeholder.com/36" alt="A">
+        <div id="username" class="username">загрузка...</div>
     </div>
 
-    <!-- Игровой контейнер -->
     <div class="game-container">
-        <!-- Счетчик над кнопкой -->
-        <div class="counter">
-            <span id="clickCount">0</span>
+        <div class="counter-container">
+            <div class="counter" id="clickCount">0</div>
         </div>
-        <!-- Стамина -->
-        <div class="stamina-container">
-            <div class="stamina-bar">
-                <div id="staminaFill" class="stamina-fill"></div>
+
+        <div class="button-border-outer">
+            <button id="clickButton" class="click-button">
+                <svg class="heart-icon" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="stamina-wrapper">
+            <div class="stamina-text" id="staminaText">300 / 300</div>
+            <div class="stamina-bar-container">
+                <div class="stamina-bar">
+                    <div id="staminaFill" class="stamina-fill"></div>
+                </div>
             </div>
         </div>
-        <button id="clickButton" class="click-button">
-            <svg class="heart-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-            </svg>
-        </button>
-        <button id="upgradeButton" class="upgrade-button">улучшить</button>
-    </div>
 
-    <!-- Футер -->
-    <div class="footer">
-        сделано lightalwayswillbeoff
+        <div class="upgrades-row">
+            <button id="upgradeClickBtn" class="upgrade-button">улучшить клик (500)</button>
+            <button id="upgradeStaminaBtn" class="upgrade-button">улучшить стамину (1000)</button>
+        </div>
     </div>
 
     <script>
-        // Инициализация Telegram Web App
         const tg = window.Telegram.WebApp;
-        if (tg) {
-            tg.ready();
-            tg.expand();
-            tg.enableClosingConfirmation();
-            
-            // Устанавливаем цвет фона
-            tg.setHeaderColor('#000000');
-            tg.setBackgroundColor('#0f0f0f');
-        }
-
-        // Переменные
         let clickCount = 0;
-        let isAuthorized = false;
-        let touchStartTime = 0;
-        let isHolding = false;
-        let holdTimeout = null;
-        
-        // Система улучшений
-        let upgradeLevel = 0;
+        let clickLevel = 0;
         let clicksPerClick = 1;
-        const upgradePrices = [500, 1500, 4500];
-        
-        // Анти-автокликер
-        let clickTimes = [];
-        let isBlocked = false;
-        const MAX_CLICKS_PER_SECOND = 10;
-        const BLOCK_DURATION = 3000; // 3 секунды
-        
-        // Стамина
+        let staminaLevel = 0;
+        let maxStamina = 300;
         let stamina = 300;
-        const MAX_STAMINA = 300;
-        let lastStaminaUpdate = Date.now();
-        const STAMINA_RECOVERY_TIME = 90000; // 1.5 минуты
+        const RECOVERY_PER_SECOND = 3.33; 
+        const clickUpgradePrices = [500, 1500, 5000, 15000, 50000];
+        const staminaUpgradePrices = [1000, 3000, 7000, 20000, 60000];
 
-        // Проверка авторизации
-        function checkAuth() {
-            const savedAuth = localStorage.getItem('tg_auth');
-            if (savedAuth === 'true') {
-                isAuthorized = true;
-                if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                    updateUserInfo();
-                } else {
-                    // Если авторизован, но данных нет (открыт не из Telegram)
-                    document.getElementById('username').textContent = 'Пользователь';
-                }
+        function initApp() {
+            if (tg) {
+                tg.ready();
+                tg.expand();
+                // Настройка темы
+                tg.setHeaderColor('#000000');
+                tg.setBackgroundColor('#0f0f0f');
+            }
+            if (localStorage.getItem('auth') || (tg.initDataUnsafe && tg.initDataUnsafe.user)) {
                 document.getElementById('authModal').classList.add('hidden');
-            } else {
-                // Проверяем, есть ли данные пользователя без сохранения
-                if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                    // Если открыто из Telegram, автоматически авторизуем
-                    localStorage.setItem('tg_auth', 'true');
-                    isAuthorized = true;
-                    updateUserInfo();
-                    document.getElementById('authModal').classList.add('hidden');
-                } else {
-                    document.getElementById('authModal').classList.remove('hidden');
-                }
+                localStorage.setItem('auth', 'true');
+                loadUserData();
             }
-        }
-
-        // Обновление информации о пользователе
-        function updateUserInfo() {
-            const user = tg.initDataUnsafe.user;
-            if (user) {
-                const username = user.username ? `@${user.username}` : `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'пользователь';
-                document.getElementById('username').textContent = username.toLowerCase();
-                
-                if (user.photo_url) {
-                    document.getElementById('userAvatar').src = user.photo_url;
-                } else {
-                    // Генерируем аватар по умолчанию
-                    const initials = (user.first_name?.[0] || 'U').toUpperCase();
-                    const avatar = document.getElementById('userAvatar');
-                    avatar.style.background = `linear-gradient(135deg, #4a90e2 0%, #357abd 100%)`;
-                    avatar.style.display = 'flex';
-                    avatar.style.alignItems = 'center';
-                    avatar.style.justifyContent = 'center';
-                    avatar.style.fontSize = '20px';
-                    avatar.style.color = 'white';
-                    avatar.textContent = initials;
-                }
-            }
-        }
-
-        // Кнопка "гость"
-        document.getElementById('guestButton').addEventListener('click', () => {
-            localStorage.setItem('tg_auth', 'true');
-            isAuthorized = true;
-            document.getElementById('username').textContent = 'гость';
-            document.getElementById('authModal').classList.add('hidden');
-        });
-        
-        // Авторизация через Telegram
-        document.getElementById('authButton').addEventListener('click', async () => {
-            try {
-                // Запрашиваем доступ к данным пользователя
-                if (tg.requestAccess) {
-                    await tg.requestAccess();
-                }
-                
-                // Проверяем наличие данных пользователя
-                if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                    localStorage.setItem('tg_auth', 'true');
-                    isAuthorized = true;
-                    updateUserInfo();
-                    document.getElementById('authModal').classList.add('hidden');
-                } else {
-                    // Если данных нет, все равно разрешаем доступ (для тестирования)
-                    localStorage.setItem('tg_auth', 'true');
-                    isAuthorized = true;
-                    document.getElementById('username').textContent = 'Пользователь';
-                    document.getElementById('authModal').classList.add('hidden');
-                }
-            } catch (error) {
-                console.error('Ошибка авторизации:', error);
-                // В случае ошибки все равно разрешаем доступ
-                localStorage.setItem('tg_auth', 'true');
-                isAuthorized = true;
-                document.getElementById('username').textContent = 'Пользователь';
-                document.getElementById('authModal').classList.add('hidden');
-            }
-        });
-
-        // Загрузка данных из localStorage
-        function loadGameData() {
-            const saved = localStorage.getItem('clickCount');
-            if (saved) {
-                clickCount = parseInt(saved) || 0;
-                updateCounter();
-            }
-            
-            const savedUpgrade = localStorage.getItem('upgradeLevel');
-            if (savedUpgrade) {
-                upgradeLevel = parseInt(savedUpgrade) || 0;
-                clicksPerClick = 1 + upgradeLevel;
-                updateUpgradeButton();
-            }
-        }
-
-        // Сохранение данных в localStorage
-        function saveGameData() {
-            localStorage.setItem('clickCount', clickCount.toString());
-            localStorage.setItem('upgradeLevel', upgradeLevel.toString());
-        }
-        
-        // Обновление кнопки улучшения
-        function updateUpgradeButton() {
-            const button = document.getElementById('upgradeButton');
-            if (upgradeLevel >= upgradePrices.length) {
-                button.textContent = 'максимум';
-                button.disabled = true;
-            } else {
-                const price = upgradePrices[upgradeLevel];
-                button.textContent = `улучшить (${price.toLocaleString('ru-RU')})`;
-                button.disabled = clickCount < price;
-            }
-        }
-        
-        // Улучшение
-        function upgrade() {
-            if (upgradeLevel >= upgradePrices.length) return;
-            
-            const price = upgradePrices[upgradeLevel];
-            if (clickCount < price) return;
-            
-            clickCount -= price;
-            upgradeLevel++;
-            clicksPerClick++;
-            
-            updateCounter();
-            updateUpgradeButton();
-            saveGameData();
-        }
-
-        // Обновление счетчика
-        function updateCounter() {
-            document.getElementById('clickCount').textContent = clickCount.toLocaleString('ru-RU');
-            updateUpgradeButton();
-        }
-
-        // Вибрация (если поддерживается)
-        function vibrate() {
-            if (navigator.vibrate) {
-                navigator.vibrate(50); // 50ms вибрация
-            } else if (navigator.webkitVibrate) {
-                navigator.webkitVibrate(50);
-            }
-        }
-
-        // Создание эффекта +1 в случайном месте рядом с кнопкой
-        function createPlusOne() {
-            const button = document.getElementById('clickButton');
-            const rect = button.getBoundingClientRect();
-            const buttonCenterX = rect.left + rect.width / 2;
-            const buttonCenterY = rect.top + rect.height / 2;
-            
-            // Случайное смещение от центра кнопки (от -60 до +60 пикселей)
-            const offsetX = (Math.random() - 0.5) * 120;
-            const offsetY = (Math.random() - 0.5) * 120;
-            
-            const x = buttonCenterX + offsetX;
-            const y = buttonCenterY + offsetY;
-            
-            const plusOne = document.createElement('div');
-            plusOne.className = 'plus-one';
-            plusOne.textContent = `+${clicksPerClick}`;
-            plusOne.style.left = x + 'px';
-            plusOne.style.top = y + 'px';
-            document.body.appendChild(plusOne);
-
-            setTimeout(() => {
-                plusOne.remove();
-            }, 1000);
-        }
-
-        // Проверка анти-автокликера
-        function checkAutoClicker() {
-            const now = Date.now();
-            clickTimes = clickTimes.filter(time => now - time < 1000); // Оставляем только клики за последнюю секунду
-            
-            if (clickTimes.length >= MAX_CLICKS_PER_SECOND) {
-                blockButton();
-                return true;
-            }
-            return false;
-        }
-        
-        // Блокировка кнопки
-        function blockButton() {
-            if (isBlocked) return;
-            
-            isBlocked = true;
-            const button = document.getElementById('clickButton');
-            button.classList.add('disabled');
-            
-            setTimeout(() => {
-                isBlocked = false;
-                button.classList.remove('disabled');
-            }, BLOCK_DURATION);
-        }
-        
-        // Обновление стамины
-        function updateStamina() {
-            const now = Date.now();
-            const timePassed = now - lastStaminaUpdate;
-            
-            if (stamina < MAX_STAMINA) {
-                const recoveryRate = MAX_STAMINA / STAMINA_RECOVERY_TIME;
-                stamina = Math.min(MAX_STAMINA, stamina + (timePassed * recoveryRate / 1000));
-                lastStaminaUpdate = now;
-            }
-            
-            const staminaPercent = (stamina / MAX_STAMINA) * 100;
-            document.getElementById('staminaFill').style.width = staminaPercent + '%';
-        }
-        
-        // Обработка клика
-        function handleClick(event) {
-            if (!isAuthorized || isBlocked) return;
-            
-            // Проверка стамины
-            if (stamina < 1) return;
-            
-            // Проверка анти-автокликера
-            const now = Date.now();
-            clickTimes.push(now);
-            if (checkAutoClicker()) return;
-            
-            // Тратим стамину
-            stamina--;
-            lastStaminaUpdate = Date.now();
-            updateStamina();
-            
-            // Добавляем клики
-            clickCount += clicksPerClick;
-            updateCounter();
-            saveGameData();
-            vibrate();
-            
-            createPlusOne();
-        }
-
-        // Обработка начала удержания (3D Touch)
-        function handleTouchStart(event) {
-            if (!isAuthorized) return;
-            
-            touchStartTime = Date.now();
-            isHolding = false;
-            
-            const button = document.getElementById('clickButton');
-            button.classList.add('holding');
-            
-            // Если удерживать более 100ms, считаем это удержанием
-            holdTimeout = setTimeout(() => {
-                isHolding = true;
-            }, 100);
-        }
-
-        // Обработка окончания удержания
-        function handleTouchEnd(event) {
-            const button = document.getElementById('clickButton');
-            button.classList.remove('holding');
-            
-            if (holdTimeout) {
-                clearTimeout(holdTimeout);
-                holdTimeout = null;
-            }
-
-            // Если не было удержания, это обычный клик
-            if (!isHolding && Date.now() - touchStartTime < 300) {
-                handleClick(event);
-            }
-            
-            isHolding = false;
-        }
-
-        // Обработка отмены касания
-        function handleTouchCancel(event) {
-            const button = document.getElementById('clickButton');
-            button.classList.remove('holding');
-            
-            if (holdTimeout) {
-                clearTimeout(holdTimeout);
-                holdTimeout = null;
-            }
-            
-            isHolding = false;
-        }
-
-        // Загрузка центрального изображения (если есть) - отключено
-        function loadCenterImage() {
-            // Центральное изображение не используется
-        }
-        
-        // Загрузка изображения котика - отключено
-        function loadCatImage() {
-            // Изображение котика отключено
-        }
-
-        // Инициализация
-        function init() {
-            checkAuth();
             loadGameData();
-            loadCenterImage();
-            loadCatImage();
-            updateUpgradeButton();
-            updateStamina();
-            
-            // Обновление стамины каждую секунду
-            setInterval(updateStamina, 1000);
-            
-            const button = document.getElementById('clickButton');
-            const upgradeBtn = document.getElementById('upgradeButton');
-            
-            // Кнопка улучшения
-            upgradeBtn.addEventListener('click', upgrade);
-            
-            // Обработчики для касаний (3D Touch) - убираем click чтобы избежать двойного клика
-            button.addEventListener('touchstart', handleTouchStart, { passive: true });
-            button.addEventListener('touchend', handleTouchEnd, { passive: true });
-            button.addEventListener('touchcancel', handleTouchCancel, { passive: true });
-            
-            // Обработчики для удержания мыши (для десктопа)
-            button.addEventListener('mousedown', () => {
-                if (!isAuthorized || isBlocked) return;
-                touchStartTime = Date.now();
-                isHolding = false;
-                button.classList.add('holding');
-                holdTimeout = setTimeout(() => {
-                    isHolding = true;
-                }, 100);
-            });
-            
-            button.addEventListener('mouseup', () => {
-                button.classList.remove('holding');
-                if (holdTimeout) {
-                    clearTimeout(holdTimeout);
-                    holdTimeout = null;
-                }
-                if (!isHolding && Date.now() - touchStartTime < 300) {
-                    handleClick();
-                }
-                isHolding = false;
-            });
-            
-            button.addEventListener('mouseleave', () => {
-                button.classList.remove('holding');
-                if (holdTimeout) {
-                    clearTimeout(holdTimeout);
-                    holdTimeout = null;
-                }
-                isHolding = false;
-            });
+            setInterval(updateStaminaLogic, 1000);
         }
 
-        // Запуск при загрузке
-        window.addEventListener('load', init);
+        function loadUserData() {
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                document.getElementById('username').textContent = (user.username || user.first_name).toLowerCase();
+                if (user.photo_url) document.getElementById('userAvatar').src = user.photo_url;
+            } else {
+                document.getElementById('username').textContent = "гость";
+            }
+        }
+
+        function loadGameData() {
+            clickCount = parseInt(localStorage.getItem('clicks')) || 0;
+            clickLevel = parseInt(localStorage.getItem('clickLvl')) || 0;
+            staminaLevel = parseInt(localStorage.getItem('staminaLvl')) || 0;
+            clicksPerClick = 1 + clickLevel;
+            maxStamina = 300 + (staminaLevel * 100);
+
+            const savedStamina = localStorage.getItem('stmn');
+            const savedTime = localStorage.getItem('time');
+            if (savedStamina && savedTime) {
+                const passed = (Date.now() - parseInt(savedTime)) / 1000;
+                stamina = Math.min(maxStamina, parseFloat(savedStamina) + (passed * RECOVERY_PER_SECOND));
+            } else {
+                stamina = maxStamina;
+            }
+            updateUI();
+        }
+
+        function saveGameData() {
+            localStorage.setItem('clicks', clickCount);
+            localStorage.setItem('clickLvl', clickLevel);
+            localStorage.setItem('staminaLvl', staminaLevel);
+            localStorage.setItem('stmn', stamina);
+            localStorage.setItem('time', Date.now());
+        }
+
+        function updateUI() {
+            document.getElementById('clickCount').textContent = Math.floor(clickCount).toLocaleString();
+            
+            const upgClickBtn = document.getElementById('upgradeClickBtn');
+            if (clickLevel < clickUpgradePrices.length) {
+                upgClickBtn.textContent = `улучшить клик (${clickUpgradePrices[clickLevel]})`;
+                upgClickBtn.disabled = clickCount < clickUpgradePrices[clickLevel];
+            } else {
+                upgClickBtn.textContent = "клик макс. lvl";
+                upgClickBtn.disabled = true;
+            }
+
+            const upgStaminaBtn = document.getElementById('upgradeStaminaBtn');
+            if (staminaLevel < staminaUpgradePrices.length) {
+                upgStaminaBtn.textContent = `улучшить стамину (${staminaUpgradePrices[staminaLevel]})`;
+                upgStaminaBtn.disabled = clickCount < staminaUpgradePrices[staminaLevel];
+            } else {
+                upgStaminaBtn.textContent = "стамина макс. lvl";
+                upgStaminaBtn.disabled = true;
+            }
+            updateStaminaDisplay();
+        }
+
+        function updateStaminaDisplay() {
+            document.getElementById('staminaText').textContent = `${Math.floor(stamina)} / ${maxStamina}`;
+            document.getElementById('staminaFill').style.width = (stamina / maxStamina * 100) + '%';
+        }
+
+        function updateStaminaLogic() {
+            if (stamina < maxStamina) {
+                stamina = Math.min(maxStamina, stamina + RECOVERY_PER_SECOND);
+            }
+            updateStaminaDisplay();
+            localStorage.setItem('stmn', stamina);
+            localStorage.setItem('time', Date.now());
+        }
+
+        function handleClick(e) {
+            if (e.cancelable) e.preventDefault();
+            if (stamina < 1) {
+                // Вибрация ошибки (два коротких)
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+                return;
+            }
+            
+            stamina -= 1;
+            clickCount += clicksPerClick;
+            
+            updateUI();
+            saveGameData();
+            showPlusEffect(e);
+            
+            // ОСНОВНАЯ ВИБРАЦИЯ КЛИКА
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light'); 
+            } else if (navigator.vibrate) {
+                navigator.vibrate(40);
+            }
+        }
+
+        function showPlusEffect(e) {
+            const plus = document.createElement('div');
+            plus.className = 'plus-one';
+            plus.textContent = `+${clicksPerClick}`;
+            
+            let x, y;
+            if (e.touches && e.touches.length > 0) {
+                x = e.touches[0].clientX;
+                y = e.touches[0].clientY;
+            } else if (e.changedTouches && e.changedTouches.length > 0) {
+                x = e.changedTouches[0].clientX;
+                y = e.changedTouches[0].clientY;
+            } else {
+                x = e.clientX;
+                y = e.clientY;
+            }
+            
+            plus.style.left = (x - 20) + 'px';
+            plus.style.top = (y - 40) + 'px';
+            
+            document.body.appendChild(plus);
+            setTimeout(() => plus.remove(), 800);
+        }
+
+        const btn = document.getElementById('clickButton');
+
+        btn.addEventListener('touchstart', (e) => {
+            handleClick(e);
+        }, { passive: false });
+
+        btn.addEventListener('mousedown', (e) => {
+            if (!('ontouchstart' in window)) {
+                handleClick(e);
+            }
+        });
+
+        document.getElementById('upgradeClickBtn').addEventListener('click', () => {
+            const price = clickUpgradePrices[clickLevel];
+            if (clickCount >= price) {
+                clickCount -= price;
+                clickLevel++;
+                clicksPerClick++;
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                updateUI();
+                saveGameData();
+            }
+        });
+
+        document.getElementById('upgradeStaminaBtn').addEventListener('click', () => {
+            const price = staminaUpgradePrices[staminaLevel];
+            if (clickCount >= price) {
+                clickCount -= price;
+                staminaLevel++;
+                maxStamina += 100;
+                stamina = maxStamina;
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                updateUI();
+                saveGameData();
+            }
+        });
+
+        document.getElementById('authButton').addEventListener('click', () => {
+            localStorage.setItem('auth', 'true');
+            location.reload();
+        });
+
+        initApp();
     </script>
 </body>
 </html>
-
