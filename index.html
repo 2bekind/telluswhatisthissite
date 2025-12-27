@@ -18,8 +18,8 @@
             background: #0f0f0f; color: white;
             min-height: 100vh; display: flex; flex-direction: column;
             align-items: center; justify-content: center; overflow: hidden;
-            /* Сильная перспектива для мощного 3D */
-            perspective: 500px;
+            /* Умеренная перспектива для глубины */
+            perspective: 800px;
         }
 
         /* Авторизация */
@@ -75,24 +75,35 @@
             display: flex; align-items: center; justify-content: center;
             box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 122, 255, 0.1);
             
-            /* Желейный возврат */
-            transition: transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.4);
+            /* ИЗМЕНЕНИЕ: Более жесткий возврат (меньше желе) */
+            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
             
             transform-style: preserve-3d;
             cursor: pointer;
             position: relative;
         }
 
+        /* ИЗМЕНЕНИЕ: Увеличена инерция движения для плавности */
         .click-button.is-moving {
-            transition: transform 0.1s ease-out;
+            transition: transform 0.2s ease-out;
+        }
+
+        .click-button::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%);
+            pointer-events: none;
+            transform: translateZ(5px);
         }
 
         .heart-icon {
             width: 65px; height: 65px; fill: #007AFF;
             filter: drop-shadow(0 0 8px rgba(0, 122, 255, 0.5));
             pointer-events: none; 
-            /* Сильный параллакс для иконки */
-            transform: translateZ(60px); 
+            /* Небольшой Z-сдвиг для эффекта параллакса */
+            transform: translateZ(20px); 
         }
 
         /* Стамина */
@@ -170,14 +181,40 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        let gameState = JSON.parse(localStorage.getItem('tapper_save_v7')) || {
+        
+        let gameState = JSON.parse(localStorage.getItem('tapper_save_v5')) || {
             clicks: 0, clickLvl: 0, staminaLvl: 0, currentStamina: 300, lastSave: Date.now()
         };
 
         const CLICK_PRICES = [500, 1500, 5000, 15000, 50000];
         const STAMINA_PRICES = [1000, 3000, 7000, 20000, 60000];
+        const RECOVERY_RATE = 3.33; 
+
         const btn = document.getElementById('clickButton');
         let isTouching = false;
+
+        function init() {
+            if (tg) {
+                tg.ready(); tg.expand();
+                tg.setHeaderColor('#000000');
+            }
+            if (localStorage.getItem('auth_done') || (tg.initDataUnsafe && tg.initDataUnsafe.user)) {
+                document.getElementById('authModal').classList.add('hidden');
+                loadUser();
+            }
+            const now = Date.now();
+            const passed = (now - gameState.lastSave) / 1000;
+            const maxSt = 300 + (gameState.staminaLvl * 100);
+            gameState.currentStamina = Math.min(maxSt, gameState.currentStamina + (passed * RECOVERY_RATE));
+            updateUI();
+            setInterval(tick, 1000);
+        }
+
+        function loadUser() {
+            const user = tg.initDataUnsafe?.user;
+            document.getElementById('username').textContent = user ? (user.username || user.first_name).toLowerCase() : "гость";
+            if (user?.photo_url) document.getElementById('userAvatar').src = user.photo_url;
+        }
 
         function updateUI() {
             const maxSt = 300 + (gameState.staminaLvl * 100);
@@ -185,29 +222,48 @@
             document.getElementById('staminaText').textContent = `${Math.floor(gameState.currentStamina)} / ${maxSt}`;
             document.getElementById('staminaFill').style.width = (gameState.currentStamina / maxSt * 100) + '%';
             
-            const cp = CLICK_PRICES[gameState.clickLvl];
-            const sp = STAMINA_PRICES[gameState.staminaLvl];
-            document.getElementById('upgradeClickBtn').textContent = cp ? `улучшить клик (${cp})` : "макс";
-            document.getElementById('upgradeStaminaBtn').textContent = sp ? `улучшить стамину (${sp})` : "макс";
+            const cPrice = CLICK_PRICES[gameState.clickLvl];
+            const sPrice = STAMINA_PRICES[gameState.staminaLvl];
+            
+            document.getElementById('upgradeClickBtn').textContent = cPrice ? `улучшить клик (${cPrice})` : "клик макс. lvl";
+            document.getElementById('upgradeClickBtn').disabled = !cPrice || gameState.clicks < cPrice;
+
+            document.getElementById('upgradeStaminaBtn').textContent = sPrice ? `улучшить стамину (${sPrice})` : "стамина макс. lvl";
+            document.getElementById('upgradeStaminaBtn').disabled = !sPrice || gameState.clicks < sPrice;
         }
 
+        function tick() {
+            const maxSt = 300 + (gameState.staminaLvl * 100);
+            if (gameState.currentStamina < maxSt) {
+                gameState.currentStamina = Math.min(maxSt, gameState.currentStamina + RECOVERY_RATE);
+                updateUI();
+            }
+            gameState.lastSave = Date.now();
+            localStorage.setItem('tapper_save_v5', JSON.stringify(gameState));
+        }
+
+        // ИСПРАВЛЕННАЯ ЛОГИКА НАКЛОНА (ТУГАЯ)
         function updateTilt(e) {
             if (!isTouching) return;
+            
             btn.classList.add('is-moving');
             const rect = btn.getBoundingClientRect();
             const t = e.touches ? e.touches[0] : e;
             
-            const centerX = window.innerWidth / 2;
-            const centerY = window.innerHeight / 2;
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
             
-            const dx = (t.clientX - centerX) / (window.innerWidth / 2);
-            const dy = (t.clientY - centerY) / (window.innerHeight / 2);
+            let deltaX = (t.clientX - centerX) / (window.innerWidth / 2);
+            let deltaY = (t.clientY - centerY) / (window.innerHeight / 2);
+            
+            // Снижаем чувствительность в 2 раза (было 20, стало 10-12)
+            // Это делает кнопку более устойчивой
+            const rotateX = deltaY * -12;
+            const rotateY = deltaX * 12;
 
-            // МОЩНЫЙ НАКЛОН (50 градусов)
-            const rx = dy * -50;
-            const ry = dx * 50;
-
-            btn.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) scale(0.92) translate3d(${dx*20}px, ${dy*20}px, 0)`;
+            // Убрали translate3d (смещение), оставили только наклон и масштаб.
+            // Кнопка теперь "сидит" на месте крепче.
+            btn.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(0.96)`;
         }
 
         function handleStart(e) {
@@ -215,49 +271,68 @@
             isTouching = true;
 
             if (gameState.currentStamina >= 1) {
-                gameState.clicks += (1 + gameState.clickLvl);
+                const val = 1 + gameState.clickLvl;
+                gameState.clicks += val;
                 gameState.currentStamina -= 1;
                 
                 const t = e.touches ? e.touches[0] : e;
                 const plus = document.createElement('div');
                 plus.className = 'plus-one';
-                plus.textContent = `+${1 + gameState.clickLvl}`;
-                plus.style.left = `${t.clientX - 20}px`;
+                plus.textContent = `+${val}`;
+                // Небольшой рандом, чтобы цифры не слипались
+                const randomX = (Math.random() - 0.5) * 40;
+                plus.style.left = `${t.clientX - 20 + randomX}px`;
                 plus.style.top = `${t.clientY - 40}px`;
                 document.body.appendChild(plus);
                 setTimeout(() => plus.remove(), 700);
 
-                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
                 updateUI();
+            } else if(tg.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('error');
             }
+            
             updateTilt(e);
         }
 
         function handleEnd() {
             isTouching = false;
             btn.classList.remove('is-moving');
-            btn.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1) translate3d(0,0,0)';
+            // Возврат к нормальному состоянию, четкий и быстрый
+            btn.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
         }
 
         btn.addEventListener('touchstart', handleStart, { passive: false });
+        btn.addEventListener('mousedown', (e) => { if(!('ontouchstart' in window)) handleStart(e); });
+
         window.addEventListener('touchmove', (e) => { if(isTouching) updateTilt(e); }, { passive: false });
         window.addEventListener('touchend', handleEnd);
+        window.addEventListener('mousemove', updateTilt);
+        window.addEventListener('mouseup', handleEnd);
+
+        document.getElementById('upgradeClickBtn').onclick = () => {
+            const p = CLICK_PRICES[gameState.clickLvl];
+            if (gameState.clicks >= p) {
+                gameState.clicks -= p; gameState.clickLvl++;
+                updateUI();
+            }
+        };
+
+        document.getElementById('upgradeStaminaBtn').onclick = () => {
+            const p = STAMINA_PRICES[gameState.staminaLvl];
+            if (gameState.clicks >= p) {
+                gameState.clicks -= p; gameState.staminaLvl++;
+                gameState.currentStamina = 300 + (gameState.staminaLvl * 100);
+                updateUI();
+            }
+        };
 
         document.getElementById('authButton').onclick = () => {
             localStorage.setItem('auth_done', 'true');
             location.reload();
         };
 
-        if (localStorage.getItem('auth_done')) document.getElementById('authModal').classList.add('hidden');
-
-        setInterval(() => {
-            const max = 300 + (gameState.staminaLvl * 100);
-            if (gameState.currentStamina < max) gameState.currentStamina = Math.min(max, gameState.currentStamina + 3);
-            updateUI();
-            localStorage.setItem('tapper_save_v7', JSON.stringify(gameState));
-        }, 1000);
-
-        updateUI();
+        init();
     </script>
 </body>
 </html>
