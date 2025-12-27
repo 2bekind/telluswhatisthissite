@@ -325,7 +325,6 @@
 
     <!-- Игровой контейнер -->
     <div class="game-container">
-        <img id="centerImage" class="center-image" src="images/center.png" alt="Game Image" onerror="this.style.display='none'">
         <!-- Счетчик над кнопкой -->
         <div class="counter">
             <span id="clickCount">0</span>
@@ -337,7 +336,7 @@
             </div>
         </div>
         <button id="clickButton" class="click-button">
-            <img src="images/котик в кружочке итальянец.png" alt="Котик" onerror="this.style.display='none'; this.parentElement.innerHTML='клик';">
+            <img id="catImage" src="" alt="Котик" onerror="this.style.display='none'; this.parentElement.innerHTML='клик';">
         </button>
         <button id="upgradeButton" class="upgrade-button">улучшить</button>
     </div>
@@ -679,15 +678,15 @@
             isHolding = false;
         }
 
-        // Загрузка центрального изображения (если есть)
+        // Загрузка центрального изображения (если есть) - отключено
         function loadCenterImage() {
-            const image = document.getElementById('centerImage');
-            // Просто скрываем, если изображение не загрузилось
-            image.onerror = () => {
-                image.style.display = 'none';
-            };
-            // Пробуем загрузить только одно изображение
-            image.src = 'images/center.png';
+            // Центральное изображение не используется
+        }
+        
+        // Загрузка изображения котика
+        function loadCatImage() {
+            const catImage = document.getElementById('catImage');
+            catImage.src = 'images/cat.png';
         }
 
         // Инициализация
@@ -695,6 +694,7 @@
             checkAuth();
             loadGameData();
             loadCenterImage();
+            loadCatImage();
             updateUpgradeButton();
             updateStamina();
             
