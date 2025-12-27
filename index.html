@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <title>telluswhatisthissite</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -322,7 +325,7 @@
 
     <!-- Игровой контейнер -->
     <div class="game-container">
-        <img id="centerImage" class="center-image" src="" alt="Game Image" onerror="this.style.display='none'">
+        <img id="centerImage" class="center-image" src="images/center.png" alt="Game Image" onerror="this.style.display='none'">
         <!-- Счетчик над кнопкой -->
         <div class="counter">
             <span id="clickCount">0</span>
@@ -334,7 +337,7 @@
             </div>
         </div>
         <button id="clickButton" class="click-button">
-            <img src=".images/котик в кружочке итальянец.png" alt="Котик" onerror="this.style.display='none'; this.parentElement.innerHTML='клик';">
+            <img src="images/котик в кружочке итальянец.png" alt="Котик" onerror="this.style.display='none'; this.parentElement.innerHTML='клик';">
         </button>
         <button id="upgradeButton" class="upgrade-button">улучшить</button>
     </div>
@@ -347,8 +350,15 @@
     <script>
         // Инициализация Telegram Web App
         const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            tg.enableClosingConfirmation();
+            
+            // Устанавливаем цвет фона
+            tg.setHeaderColor('#000000');
+            tg.setBackgroundColor('#0f0f0f');
+        }
 
         // Переменные
         let clickCount = 0;
@@ -669,36 +679,15 @@
             isHolding = false;
         }
 
-        // Поиск и загрузка изображения
+        // Загрузка центрального изображения (если есть)
         function loadCenterImage() {
             const image = document.getElementById('centerImage');
-            const possibleNames = ['hamster', 'image', 'img', 'photo', 'pic', 'game'];
-            const extensions = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
-            
-            function tryLoad(nameIndex, extIndex) {
-                if (nameIndex >= possibleNames.length) {
-                    image.style.display = 'none';
-                    return;
-                }
-                
-                if (extIndex >= extensions.length) {
-                    tryLoad(nameIndex + 1, 0);
-                    return;
-                }
-                
-                const img = new Image();
-                img.onload = () => {
-                    image.src = img.src;
-                    image.style.display = 'block';
-                };
-                img.onerror = () => {
-                    tryLoad(nameIndex, extIndex + 1);
-                };
-                
-                img.src = `images/${possibleNames[nameIndex]}.${extensions[extIndex]}`;
-            }
-            
-            tryLoad(0, 0);
+            // Просто скрываем, если изображение не загрузилось
+            image.onerror = () => {
+                image.style.display = 'none';
+            };
+            // Пробуем загрузить только одно изображение
+            image.src = 'images/center.png';
         }
 
         // Инициализация
