@@ -18,38 +18,122 @@
             background: #0f0f0f; color: white;
             min-height: 100vh; display: flex; flex-direction: column;
             align-items: center; justify-content: center; overflow: hidden;
-            /* Умеренная перспектива для глубины */
             perspective: 800px;
         }
 
-        /* Авторизация */
-        .auth-modal {
+        /* --- UI Элементы --- */
+        .header {
+            position: absolute; top: 20px; left: 20px;
+            display: inline-flex; align-items: center; gap: 12px;
+            padding: 8px 16px; background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+            z-index: 10;
+        }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid #007AFF; }
+        .username { font-size: 15px; font-weight: 590; color: #fff; }
+
+        .settings-btn {
+            position: absolute; top: 20px; right: 20px;
+            width: 52px; height: 52px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 10;
+            transition: background 0.2s;
+        }
+        .settings-btn:active { background: rgba(255, 255, 255, 0.1); }
+        .gear-icon { width: 24px; height: 24px; fill: #fff; opacity: 0.8; }
+
+        /* --- Модальные окна --- */
+        .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; display: flex; align-items: center; justify-content: center;
-            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8); 
+            backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
         }
-        .auth-modal.hidden { display: none; }
-        .auth-content {
-            background: #111; border: 1px solid #222; border-radius: 20px;
-            padding: 40px; text-align: center; width: 85%; max-width: 320px;
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal-content {
+            background: #1c1c1e; border: 1px solid #333; border-radius: 24px;
+            padding: 30px; width: 85%; max-width: 320px;
+            transform: scale(0.9); transition: transform 0.3s ease;
         }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+
+        .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; text-align: center; }
+        
         .auth-button { 
             background: #007AFF; color: white; border: none; 
             border-radius: 12px; padding: 16px; width: 100%; 
             font-weight: 600; font-size: 17px; cursor: pointer;
         }
 
-        /* Профиль */
-        .header {
-            position: absolute; top: 20px; left: 20px;
-            display: inline-flex; align-items: center; gap: 12px;
-            padding: 8px 16px; background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+        /* --- Настройки: Тоггл и Слайдер --- */
+        .setting-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px;
+            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-        .avatar { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid #007AFF; }
-        .username { font-size: 15px; font-weight: 590; color: #fff; }
+        .setting-label { font-size: 16px; font-weight: 500; }
+        
+        .switch { position: relative; display: inline-block; width: 50px; height: 30px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #3a3a3c; transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: "";
+            height: 26px; width: 26px; left: 2px; bottom: 2px;
+            background-color: white; transition: .4s;
+            border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        input:checked + .slider { background-color: #007AFF; }
+        input:checked + .slider:before { transform: translateX(20px); }
 
-        /* Счетчик */
+        /* Слайдер силы вибрации */
+        .vibration-level-container {
+            margin-top: -10px; margin-bottom: 20px;
+            display: flex; flex-direction: column; gap: 10px;
+            transition: all 0.3s ease; overflow: hidden;
+            max-height: 100px; opacity: 1;
+        }
+        .vibration-level-container.hidden {
+            max-height: 0; opacity: 0; margin: 0; padding: 0;
+        }
+
+        .range-labels {
+            display: flex; justify-content: space-between;
+            font-size: 12px; color: #888; padding: 0 4px;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent;
+        }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 6px; cursor: pointer;
+            background: #3a3a3c; border-radius: 5px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 22px; width: 22px; border-radius: 50%;
+            background: #fff; cursor: pointer;
+            -webkit-appearance: none; margin-top: -8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .close-btn {
+            background: rgba(255,255,255,0.1); color: white; border: none;
+            width: 100%; padding: 14px; border-radius: 12px;
+            font-size: 16px; font-weight: 600; margin-top: 10px; cursor: pointer;
+        }
+
+        /* --- Основной Интерфейс --- */
         .counter-container {
             padding: 10px 25px; background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px;
@@ -57,7 +141,6 @@
         }
         .counter { font-size: 36px; font-weight: 700; }
 
-        /* Игровая зона */
         .button-area {
             position: relative; display: flex; align-items: center; justify-content: center;
         }
@@ -74,39 +157,24 @@
             background: #1a1a1a; border: 4px solid #1c1c1e;
             display: flex; align-items: center; justify-content: center;
             box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 122, 255, 0.1);
-            
-            /* ИЗМЕНЕНИЕ: Более жесткий возврат (меньше желе) */
             transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-            
             transform-style: preserve-3d;
-            cursor: pointer;
-            position: relative;
+            cursor: pointer; position: relative;
         }
-
-        /* ИЗМЕНЕНИЕ: Увеличена инерция движения для плавности */
-        .click-button.is-moving {
-            transition: transform 0.2s ease-out;
-        }
-
+        .click-button.is-moving { transition: transform 0.2s ease-out; }
         .click-button::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             border-radius: 50%;
             background: radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%);
-            pointer-events: none;
-            transform: translateZ(5px);
+            pointer-events: none; transform: translateZ(5px);
         }
 
         .heart-icon {
             width: 65px; height: 65px; fill: #007AFF;
             filter: drop-shadow(0 0 8px rgba(0, 122, 255, 0.5));
-            pointer-events: none; 
-            /* Небольшой Z-сдвиг для эффекта параллакса */
-            transform: translateZ(20px); 
+            pointer-events: none; transform: translateZ(20px); 
         }
 
-        /* Стамина */
         .stamina-wrapper { width: 220px; margin: 25px 0; text-align: center; }
         .stamina-text { color: rgba(255, 255, 255, 0.6); font-size: 14px; margin-bottom: 8px; font-weight: 600; }
         .stamina-bar {
@@ -118,7 +186,6 @@
             width: 100%; transition: width 0.2s ease-out;
         }
 
-        /* Кнопки улучшений */
         .upgrades-row { display: flex; flex-direction: column; gap: 10px; width: 220px; }
         .upgrade-button {
             background: transparent; color: #007AFF; border: 1px solid #007AFF;
@@ -141,16 +208,47 @@
 </head>
 <body>
 
-    <div id="authModal" class="auth-modal">
-        <div class="auth-content">
-            <h2 style="color:white; margin-bottom:20px; font-weight:600;">tapper app</h2>
+    <div id="authModal" class="modal-overlay active">
+        <div class="modal-content">
+            <h2 class="modal-title">tapper app</h2>
             <button id="authButton" class="auth-button">войти через tg</button>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="modal-title">Настройки</h2>
+            
+            <div class="setting-row">
+                <span class="setting-label">Вибрация</span>
+                <label class="switch">
+                    <input type="checkbox" id="vibrationToggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div id="vibrationLevelRow" class="vibration-level-container">
+                <div class="range-labels">
+                    <span>Легкая</span>
+                    <span>Средняя</span>
+                    <span>Сильная</span>
+                </div>
+                <input type="range" id="vibrationRange" min="1" max="3" step="1" value="2">
+            </div>
+
+            <button id="closeSettings" class="close-btn">Закрыть</button>
         </div>
     </div>
 
     <div class="header">
         <img id="userAvatar" class="avatar" src="https://via.placeholder.com/36">
         <div id="username" class="username">загрузка...</div>
+    </div>
+
+    <div id="openSettingsBtn" class="settings-btn">
+        <svg class="gear-icon" viewBox="0 0 24 24">
+            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.58 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+        </svg>
     </div>
 
     <div class="counter-container">
@@ -186,6 +284,19 @@
             clicks: 0, clickLvl: 0, staminaLvl: 0, currentStamina: 300, lastSave: Date.now()
         };
 
+        // НАСТРОЙКИ: по умолчанию включено (true), уровень 'medium'
+        let userSettings = JSON.parse(localStorage.getItem('tapper_settings_v2')) || {
+            vibration: true,
+            vibrationLevel: 'medium' // values: 'light', 'medium', 'heavy'
+        };
+
+        const VIBRATION_MAP = {
+            1: 'light',
+            2: 'medium',
+            3: 'heavy'
+        };
+        const REVERSE_VIBRATION_MAP = { 'light': 1, 'medium': 2, 'heavy': 3 };
+
         const CLICK_PRICES = [500, 1500, 5000, 15000, 50000];
         const STAMINA_PRICES = [1000, 3000, 7000, 20000, 60000];
         const RECOVERY_RATE = 3.33; 
@@ -198,10 +309,24 @@
                 tg.ready(); tg.expand();
                 tg.setHeaderColor('#000000');
             }
+            
             if (localStorage.getItem('auth_done') || (tg.initDataUnsafe && tg.initDataUnsafe.user)) {
-                document.getElementById('authModal').classList.add('hidden');
+                document.getElementById('authModal').classList.remove('active');
                 loadUser();
             }
+
+            // Инициализация UI настроек
+            const toggle = document.getElementById('vibrationToggle');
+            const range = document.getElementById('vibrationRange');
+            const levelRow = document.getElementById('vibrationLevelRow');
+
+            toggle.checked = userSettings.vibration;
+            range.value = REVERSE_VIBRATION_MAP[userSettings.vibrationLevel] || 2;
+            
+            if (!userSettings.vibration) {
+                levelRow.classList.add('hidden');
+            }
+
             const now = Date.now();
             const passed = (now - gameState.lastSave) / 1000;
             const maxSt = 300 + (gameState.staminaLvl * 100);
@@ -242,27 +367,17 @@
             localStorage.setItem('tapper_save_v5', JSON.stringify(gameState));
         }
 
-        // ИСПРАВЛЕННАЯ ЛОГИКА НАКЛОНА (ТУГАЯ)
         function updateTilt(e) {
             if (!isTouching) return;
-            
             btn.classList.add('is-moving');
             const rect = btn.getBoundingClientRect();
             const t = e.touches ? e.touches[0] : e;
-            
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
-            
             let deltaX = (t.clientX - centerX) / (window.innerWidth / 2);
             let deltaY = (t.clientY - centerY) / (window.innerHeight / 2);
-            
-            // Снижаем чувствительность в 2 раза (было 20, стало 10-12)
-            // Это делает кнопку более устойчивой
             const rotateX = deltaY * -12;
             const rotateY = deltaX * 12;
-
-            // Убрали translate3d (смещение), оставили только наклон и масштаб.
-            // Кнопка теперь "сидит" на месте крепче.
             btn.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(0.96)`;
         }
 
@@ -279,17 +394,22 @@
                 const plus = document.createElement('div');
                 plus.className = 'plus-one';
                 plus.textContent = `+${val}`;
-                // Небольшой рандом, чтобы цифры не слипались
                 const randomX = (Math.random() - 0.5) * 40;
                 plus.style.left = `${t.clientX - 20 + randomX}px`;
                 plus.style.top = `${t.clientY - 40}px`;
                 document.body.appendChild(plus);
                 setTimeout(() => plus.remove(), 700);
 
-                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                // --- ВИБРАЦИЯ С УЧЕТОМ СИЛЫ ---
+                if (userSettings.vibration && tg.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred(userSettings.vibrationLevel);
+                }
+                
                 updateUI();
-            } else if(tg.HapticFeedback) {
-                tg.HapticFeedback.notificationOccurred('error');
+            } else {
+                if (userSettings.vibration && tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('error');
+                }
             }
             
             updateTilt(e);
@@ -298,13 +418,11 @@
         function handleEnd() {
             isTouching = false;
             btn.classList.remove('is-moving');
-            // Возврат к нормальному состоянию, четкий и быстрый
             btn.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
         }
 
         btn.addEventListener('touchstart', handleStart, { passive: false });
         btn.addEventListener('mousedown', (e) => { if(!('ontouchstart' in window)) handleStart(e); });
-
         window.addEventListener('touchmove', (e) => { if(isTouching) updateTilt(e); }, { passive: false });
         window.addEventListener('touchend', handleEnd);
         window.addEventListener('mousemove', updateTilt);
@@ -330,6 +448,53 @@
         document.getElementById('authButton').onclick = () => {
             localStorage.setItem('auth_done', 'true');
             location.reload();
+        };
+
+        // --- ЛОГИКА НАСТРОЕК ---
+        const settingsModal = document.getElementById('settingsModal');
+        const vibrationToggle = document.getElementById('vibrationToggle');
+        const vibrationRange = document.getElementById('vibrationRange');
+        const vibrationLevelRow = document.getElementById('vibrationLevelRow');
+
+        document.getElementById('openSettingsBtn').onclick = () => {
+            settingsModal.classList.add('active');
+        };
+
+        document.getElementById('closeSettings').onclick = () => {
+            settingsModal.classList.remove('active');
+        };
+
+        function saveSettings() {
+            localStorage.setItem('tapper_settings_v2', JSON.stringify(userSettings));
+        }
+
+        // Переключение Вкл/Выкл
+        vibrationToggle.onchange = () => {
+            userSettings.vibration = vibrationToggle.checked;
+            
+            if (userSettings.vibration) {
+                vibrationLevelRow.classList.remove('hidden');
+                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            } else {
+                vibrationLevelRow.classList.add('hidden');
+            }
+            saveSettings();
+        };
+
+        // Изменение силы вибрации
+        vibrationRange.oninput = () => {
+            const level = VIBRATION_MAP[vibrationRange.value];
+            userSettings.vibrationLevel = level;
+            
+            // Демонстрация новой силы вибрации
+            if (tg.HapticFeedback && userSettings.vibration) {
+                tg.HapticFeedback.impactOccurred(level);
+            }
+            saveSettings();
+        };
+
+        settingsModal.onclick = (e) => {
+            if (e.target === settingsModal) settingsModal.classList.remove('active');
         };
 
         init();
