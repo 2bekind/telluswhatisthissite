@@ -267,7 +267,6 @@
             transform: scale(1.15);
             box-shadow: 0 0 12px rgba(255,255,255,0.5);
         }
-
         /* --- ПРОФИЛЬ --- */
         .profile-info {
             text-align: center; margin-bottom: 20px;
@@ -277,6 +276,21 @@
         }
         .profile-label { font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 4px; }
         .profile-value { font-size: 24px; font-weight: 700; color: #ffffff; }
+
+        /* --- СКИНЫ --- */
+        .skin-button {
+            width: 45px; height: 45px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: transparent; cursor: pointer;
+            transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+        }
+        .skin-button:hover { border-color: rgba(255,255,255,0.5); transform: scale(1.05); }
+        .skin-button.active { border-color: #007AFF; box-shadow: 0 0 10px rgba(0, 122, 255, 0.5); }
+        .skin-button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .skin-button.locked::after {
+            content: '🔒'; position: absolute; font-size: 12px;
+        }
 
         .progress-bar {
             width: 100%; height: 6px; background: rgba(0,0,0,0.3);
@@ -328,7 +342,7 @@
             .auth-button { padding: 14px; font-size: 15px; }
             .close-btn { padding: 12px; font-size: 14px; }
             .nav-item { width: 50px; height: 50px; }
-            .nav-item.center { width: 60px; height: 60px; margin-bottom: 20px; }
+            .nav-item.center { width: 56px; height: 56px; margin-bottom: 0; }
             .nav-avatar { width: 45px; height: 45px; }
         }
 
@@ -387,6 +401,11 @@
                 <input type="range" id="vibrationRange" min="1" max="3" step="1" value="2">
             </div>
 
+            <div class="setting-row" style="flex-direction: column; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <span class="setting-label" style="margin-bottom: 12px;">скины сердечка</span>
+                <div id="skinContainer" style="display: flex; gap: 10px; flex-wrap: wrap; width: 100%;"></div>
+            </div>
+
             <button id="resetProgressBtn" class="close-btn" style="background: #ff3b30; margin-bottom: 10px;">стереть весь прогресс</button>
             <button id="closeSettings" class="close-btn">закрыть</button>
         </div>
@@ -400,6 +419,18 @@
             </p>
             <button id="resetConfirmBtn" class="auth-button" style="background: #ff3b30; margin-bottom: 10px;">да, удалить</button>
             <button id="resetCancelBtn" class="close-btn">отмена</button>
+        </div>
+    </div>
+
+    <div id="levelUpModal" class="modal-overlay vault-modal">
+        <div class="modal-content">
+            <div class="vault-icon">🎉</div>
+            <h2 class="modal-title" style="margin-top: 10px;">у тебя новый уровень!</h2>
+            <div class="vault-amount" style="font-size: 72px; margin: 10px 0;">✨</div>
+            <p style="text-align: center; color: rgba(255,255,255,0.8); margin-bottom: 15px; font-size: 14px;">
+                тебе доступен новый цвет, примерь его в настройках.
+            </p>
+            <button id="levelUpCloseBtn" class="auth-button">окей</button>
         </div>
     </div>
 
@@ -502,7 +533,8 @@
 
         let userSettings = JSON.parse(localStorage.getItem('tapper_settings_v2')) || {
             vibration: true,
-            vibrationLevel: 'medium'
+            vibrationLevel: 'medium',
+            heartSkin: 0
         };
 
         const VIBRATION_MAP = { 1: 'light', 2: 'medium', 3: 'heavy' };
@@ -528,6 +560,17 @@
         const MAX_STAMINA = 300000;
         const RECOVERY_RATE = 1;
         const OFFLINE_INCOME_INTERVAL = 10; // в секундах
+
+        // Скины сердечек доступные по уровням
+        const HEART_SKINS = {
+            0: { emoji: '❤️', name: 'красное', color: '#FF0000' },
+            1: { emoji: '🧡', name: 'оранжевое', color: '#FFA500' },
+            2: { emoji: '💛', name: 'желтое', color: '#FFFF00' },
+            3: { emoji: '💚', name: 'зеленое', color: '#00AA00' },
+            4: { emoji: '💙', name: 'синее', color: '#0000FF' },
+            5: { emoji: '💜', name: 'фиолетовое', color: '#9932CC' },
+            6: { emoji: '🖤', name: 'черное', color: '#000000' }
+        };
 
         const LEVEL_SYSTEM = {
             0: { price: 0, color: '#007AFF', name: '1ур.' },
@@ -669,12 +712,27 @@
         }
 
         function getCurrentLevel() {
+            const maxEver = gameState.maxClicks || gameState.clicks;
             for (let i = 6; i >= 0; i--) {
-                if (gameState.clicks >= LEVEL_SYSTEM[i].price) {
+                if (maxEver >= LEVEL_SYSTEM[i].price) {
                     return i;
                 }
             }
             return 0;
+        }
+        
+        let lastLevel = 0;
+        
+        function checkLevelUp() {
+            const currentLevel = getCurrentLevel();
+            if (currentLevel > lastLevel) {
+                lastLevel = currentLevel;
+                showLevelUpModal(currentLevel + 1);
+            }
+        }
+        
+        function showLevelUpModal(level) {
+            document.getElementById('levelUpModal').classList.add('active');
         }
 
         function updateUI() {
@@ -701,11 +759,14 @@
             document.getElementById('levelText').textContent = `${currentLevel + 1}ур. / 7ур.`;
             document.getElementById('levelFill').style.width = levelProgress + '%';
             
+            checkLevelUp();
+            
             const cPrice = CLICK_PRICES[gameState.clickLvl];
             const sPrice = STAMINA_PRICES[gameState.staminaLvl];
             
             const levelColor = LEVEL_SYSTEM[currentLevel].color;
-            document.querySelector('.heart-icon').style.fill = levelColor;
+            const heartIcons = document.querySelectorAll('.heart-icon');
+            heartIcons.forEach(icon => icon.style.fill = levelColor);
             
             document.getElementById('upgradeClickBtn').textContent = cPrice ? `улучшить клик (${cPrice})` : "клик макс.";
             document.getElementById('upgradeClickBtn').disabled = !cPrice || gameState.clicks < cPrice;
@@ -715,13 +776,25 @@
         }
 
         let lastServerSave = Date.now();
+        let lastStaminaFull = false;
         
         function tick() {
             const maxSt = calculateMaxStamina();
+            const wasLowStamina = gameState.currentStamina < maxSt;
+            
             if (gameState.currentStamina < maxSt) {
                 gameState.currentStamina = Math.min(maxSt, gameState.currentStamina + RECOVERY_RATE);
                 updateUI();
             }
+            
+            // Проверяем когда стамина восполнилась полностью
+            if (wasLowStamina && gameState.currentStamina >= maxSt && !lastStaminaFull) {
+                lastStaminaFull = true;
+                // notifyBotAboutStamina(); // TODO: включить когда будет правильный URL
+            } else if (gameState.currentStamina < maxSt) {
+                lastStaminaFull = false;
+            }
+            
             gameState.lastSave = Date.now();
             localStorage.setItem('tapper_save_v5', JSON.stringify(gameState));
             
@@ -736,6 +809,24 @@
                     lastSave: gameState.lastSave
                 });
                 lastServerSave = Date.now();
+            }
+        }
+        
+        async function notifyBotAboutStamina() {
+            try {
+                const user = tg.initDataUnsafe?.user;
+                const userId = user?.id || parseInt(guestId?.split('_')[1]) || 0;
+                
+                if (userId) {
+                    await fetch('http://127.0.0.1:8080/stamina', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_id: userId })
+                    });
+                    console.log('Отправлено уведомление о стамине');
+                }
+            } catch (err) {
+                console.log('Не удалось отправить уведомление:', err.message);
             }
         }
 
@@ -757,10 +848,10 @@
             if (e.cancelable) e.preventDefault();
             isTouching = true;
 
-            if (gameState.currentStamina >= 1) {
-                const val = calculateClicksPerTap();
+            const val = calculateClicksPerTap();
+            if (gameState.currentStamina >= val) {
                 gameState.clicks += val;
-                gameState.currentStamina -= 1;
+                gameState.currentStamina -= val;
                 
                 if (gameState.clicks > (gameState.maxClicks || 0)) {
                     gameState.maxClicks = gameState.clicks;
@@ -888,6 +979,56 @@
             }
             saveSettings();
         };
+
+        // Инициализация скинов
+        function initializeSkins() {
+            const container = document.getElementById('skinContainer');
+            container.innerHTML = '';
+            const currentLevel = getCurrentLevel();
+            let hasAvailableSkins = false;
+            
+            Object.keys(HEART_SKINS).forEach(level => {
+                const lvl = parseInt(level);
+                const skin = HEART_SKINS[lvl];
+                const button = document.createElement('button');
+                button.className = 'skin-button';
+                button.innerHTML = skin.emoji;
+                button.title = skin.name;
+                
+                if (lvl <= currentLevel) {
+                    hasAvailableSkins = true;
+                    // Доступен
+                    if (userSettings.heartSkin === lvl) {
+                        button.classList.add('active');
+                    }
+                    button.onclick = () => {
+                        userSettings.heartSkin = lvl;
+                        saveSettings();
+                        initializeSkins();
+                        updateUI();
+                    };
+                } else {
+                    // Заблокирован
+                    button.disabled = true;
+                    button.classList.add('locked');
+                    button.style.opacity = '0.3';
+                }
+                
+                container.appendChild(button);
+            });
+            
+            // Если нет доступных скинов, покажи сообщение
+            if (!hasAvailableSkins) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.style.color = '#888';
+                emptyMsg.style.fontSize = '12px';
+                emptyMsg.style.width = '100%';
+                emptyMsg.style.textAlign = 'center';
+                emptyMsg.style.marginTop = '8px';
+                emptyMsg.textContent = 'похоже тут пусто... как я вижу';
+                container.parentElement.appendChild(emptyMsg);
+            }
+        }
 
         document.getElementById('resetProgressBtn').onclick = () => {
             document.getElementById('resetConfirmModal').classList.add('active');
