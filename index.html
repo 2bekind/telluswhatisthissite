@@ -486,7 +486,7 @@
         <div class="button-area">
             <div class="button-border-outer">
                 <div id="clickButton" class="click-button">
-                    <svg class="heart-icon" viewBox="0 0 24 24">
+                    <svg id="mainHeartIcon" class="heart-icon" viewBox="0 0 24 24">
                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                     </svg>
                 </div>
@@ -698,6 +698,10 @@
             const maxSt = calculateMaxStamina();
             gameState.currentStamina = Math.min(maxSt, gameState.currentStamina + (passed * RECOVERY_RATE));
             
+            if (lastLevel === null) {
+                lastLevel = getCurrentLevel();
+            }
+            
             updateUI();
             setInterval(tick, 1000);
         }
@@ -726,7 +730,7 @@
             return 0;
         }
         
-        let lastLevel = getCurrentLevel();
+        let lastLevel = null;
         
         function checkLevelUp() {
             const currentLevel = getCurrentLevel();
@@ -782,8 +786,20 @@
             
             const selectedSkin = HEART_SKINS[userSettings.heartSkin];
             const heartColor = selectedSkin ? selectedSkin.color : LEVEL_SYSTEM[currentLevel].color;
+            
+            // Обновляем большое сердечко в центре
+            const mainHeart = document.getElementById('mainHeartIcon');
+            if (mainHeart) {
+                mainHeart.style.fill = heartColor;
+                mainHeart.style.filter = `drop-shadow(0 0 8px ${heartColor}80)`;
+            }
+            
+            // Обновляем все сердечки
             const heartIcons = document.querySelectorAll('.heart-icon');
-            heartIcons.forEach(icon => icon.style.fill = heartColor);
+            heartIcons.forEach(icon => {
+                icon.style.fill = heartColor;
+                icon.style.filter = `drop-shadow(0 0 8px ${heartColor}80)`;
+            });
             
             document.getElementById('upgradeClickBtn').textContent = cPrice ? `улучшить клик (${cPrice})` : "клик макс.";
             document.getElementById('upgradeClickBtn').disabled = !cPrice || gameState.clicks < cPrice;
