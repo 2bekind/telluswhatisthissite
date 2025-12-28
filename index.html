@@ -20,147 +20,16 @@
             align-items: center; justify-content: center; overflow: hidden;
             perspective: 800px;
             position: relative;
+            padding-bottom: 120px;
         }
 
-        /* --- UI Элементы --- */
-        .header { 
-            
-            position: absolute; top: 20px; left: 20px;
-            display: inline-flex; align-items: center; gap: 12px;
-            padding: 8px 16px; background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
-            z-index: 10;
-        }
-        .avatar { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid #007AFF; }
-        .username { font-size: 15px; font-weight: 590; color: #fff; }
-
-        .settings-btn {
-            position: absolute; top: 20px; right: 20px;
-            width: 52px; height: 52px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 10;
-            transition: background 0.2s;
-        }
-        .settings-btn:active { background: rgba(255, 255, 255, 0.1); }
-        .gear-icon { width: 24px; height: 24px; fill: #fff; opacity: 0.8; }
-
-        /* --- Модальные окна --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8); 
-            backdrop-filter: blur(5px);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 1000; opacity: 0; pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-
-        .modal-content {
-            background: #1c1c1e; border: 1px solid #333; border-radius: 24px;
-            padding: 30px; width: 85%; max-width: 320px;
-            transform: scale(0.9); transition: transform 0.3s ease;
-        }
-        .modal-overlay.active .modal-content { transform: scale(1); }
-
-        .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; text-align: center; }
-        
-        .auth-button { 
-            background: #007AFF; color: white; border: none; 
-            border-radius: 12px; padding: 16px; width: 100%; 
-            font-weight: 600; font-size: 17px; cursor: pointer;
-            position: relative; z-index: 1001;
+        /* --- ОСНОВНОЙ КОНТЕНТ --- */
+        .main-content {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            width: 100%; position: relative; z-index: 10;
         }
 
-        /* --- Настройки: Тоггл и Слайдер --- */
-        .setting-row {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px;
-            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .setting-label { font-size: 16px; font-weight: 500; }
-        
-        .switch { position: relative; display: inline-block; width: 50px; height: 30px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #3a3a3c; transition: .4s;
-            border-radius: 34px;
-        }
-        .slider:before {
-            position: absolute; content: "";
-            height: 26px; width: 26px; left: 2px; bottom: 2px;
-            background-color: white; transition: .4s;
-            border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        input:checked + .slider { background-color: #007AFF; }
-        input:checked + .slider:before { transform: translateX(20px); }
-
-        /* Слайдер силы вибрации */
-        .vibration-level-container {
-            margin-top: -10px; margin-bottom: 20px;
-            display: flex; flex-direction: column; gap: 10px;
-            transition: all 0.3s ease; overflow: hidden;
-            max-height: 100px; opacity: 1;
-        }
-        .vibration-level-container.hidden {
-            max-height: 0; opacity: 0; margin: 0; padding: 0;
-        }
-
-        .range-labels {
-            display: flex; justify-content: space-between;
-            font-size: 12px; color: #888; padding: 0 4px;
-        }
-
-        input[type=range] {
-            -webkit-appearance: none; width: 100%; background: transparent;
-            padding: 8px 0;
-        }
-        input[type=range]:focus { outline: none; }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 6px; cursor: pointer;
-            background: #3a3a3c; border-radius: 5px;
-            border: none;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            height: 18px; width: 18px; border-radius: 50%;
-            background: #fff; cursor: pointer;
-            -webkit-appearance: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            transition: all 0.5s ease-out;
-        }
-        input[type=range]::-webkit-slider-thumb:active {
-            transform: scale(1.15);
-            box-shadow: 0 0 12px rgba(255,255,255,0.5);
-        }
-        input[type=range]::-moz-range-track {
-            width: 100%; height: 6px; cursor: pointer;
-            background: #3a3a3c; border-radius: 5px;
-            border: none;
-        }
-        input[type=range]::-moz-range-thumb {
-            height: 18px; width: 18px; border-radius: 50%;
-            background: #fff; cursor: pointer;
-            border: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            transition: all 0.5s ease-out;
-        }
-        input[type=range]::-moz-range-thumb:active {
-            transform: scale(1.15);
-            box-shadow: 0 0 12px rgba(255,255,255,0.5);
-        }
-
-        .close-btn {
-            background: rgba(255,255,255,0.1); color: white; border: none;
-            width: 100%; padding: 14px; border-radius: 12px;
-            font-size: 16px; font-weight: 600; margin-top: 10px; cursor: pointer;
-            position: relative; z-index: 1001;
-        }
-
-        /* --- Основной Интерфейс --- */
         .counter-container {
             padding: 10px 25px; background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px;
@@ -173,10 +42,8 @@
         }
 
         .button-border-outer {
-            padding: 12px;
-            border: 2px dashed rgba(255, 255, 255, 0.15);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
+            padding: 12px; border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
         }
 
         .click-button {
@@ -199,7 +66,11 @@
         .heart-icon {
             width: 65px; height: 65px; fill: #007AFF;
             filter: drop-shadow(0 0 8px rgba(0, 122, 255, 0.5));
-            pointer-events: none; transform: translateZ(20px); 
+            pointer-events: none; transform: translateZ(20px);
+        }
+        
+        .nav-item.center .heart-icon {
+            width: 34px; height: 34px;
         }
 
         .stamina-wrapper { width: 220px; margin: 25px 0; text-align: center; }
@@ -218,6 +89,7 @@
             background: transparent; color: #007AFF; border: 1px solid #007AFF;
             border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 600;
             cursor: pointer; transition: all 0.1s; text-transform: lowercase;
+            position: relative; z-index: 1001;
         }
         .upgrade-button:active { transform: scale(0.96); background: rgba(0, 122, 255, 0.1); }
         .upgrade-button:disabled { border-color: #333; color: #555; cursor: not-allowed; }
@@ -232,31 +104,232 @@
             100% { opacity: 0; transform: translateY(-120px) scale(1.5); }
         }
 
-        /* --- Адаптивность для мобильных --- */
+        /* --- НИЖНЯЯ НАВИГАЦИЯ --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 100px; display: flex; align-items: flex-end;
+            justify-content: space-around; padding-bottom: 25px;
+            z-index: 100;
+            background: linear-gradient(180deg, rgba(20,20,20,0) 0%, rgba(20,20,20,0.7) 50%);
+        }
+
+        .nav-glass {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            height: 100px; background: rgba(20, 20, 20, 0.5);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: -1;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; justify-content: center;
+            width: 50px; height: 50px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer; transition: all 0.2s;
+            position: relative; z-index: 101;
+        }
+        .nav-item:active { background: rgba(255, 255, 255, 0.1); transform: scale(0.95); }
+
+        .nav-item.center {
+            width: 56px; height: 56px;
+            background: #1a1a1a; border: 4px solid #1c1c1e;
+            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 122, 255, 0.1);
+            margin-bottom: 0px;
+        }
+
+        .nav-icon { width: 24px; height: 24px; }
+        .nav-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #007AFF; }
+        
+        .nav-label {
+            position: absolute; bottom: -18px; font-size: 10px;
+            color: rgba(255, 255, 255, 0.6); white-space: nowrap;
+            text-align: center; width: 50px;
+            letter-spacing: -0.2px;
+        }
+
+        /* --- МОДАЛЬНЫЕ ОКНА --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal-content {
+            background: #1c1c1e; border: 1px solid #333; border-radius: 24px;
+            padding: 30px; width: 85%; max-width: 320px;
+            transform: scale(0.9); transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+
+        .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; text-align: center; }
+
+        .vault-modal .modal-content {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 20px; padding: 40px 30px;
+        }
+
+        .vault-amount {
+            font-size: 48px; font-weight: 700;
+            text-align: center; color: #fff;
+        }
+
+        .vault-icon {
+            font-size: 60px;
+        }
+
+        .auth-button {
+            background: #007AFF; color: white; border: none;
+            border-radius: 12px; padding: 16px; width: 100%;
+            font-weight: 600; font-size: 17px; cursor: pointer;
+            position: relative; z-index: 1001;
+        }
+
+        .close-btn {
+            background: rgba(255,255,255,0.1); color: white; border: none;
+            width: 100%; padding: 14px; border-radius: 12px;
+            font-size: 16px; font-weight: 600; margin-top: 10px; cursor: pointer;
+            position: relative; z-index: 1001;
+        }
+
+        /* --- НАСТРОЙКИ --- */
+        .setting-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .setting-label { font-size: 16px; font-weight: 500; }
+
+        .switch { position: relative; display: inline-block; width: 50px; height: 30px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #3a3a3c; transition: .4s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: "";
+            height: 26px; width: 26px; left: 2px; bottom: 2px;
+            background-color: white; transition: .4s;
+            border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        input:checked + .slider { background-color: #007AFF; }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .vibration-level-container {
+            margin-top: -10px; margin-bottom: 20px;
+            display: flex; flex-direction: column; gap: 10px;
+            transition: all 0.3s ease; overflow: hidden;
+            max-height: 100px; opacity: 1;
+        }
+        .vibration-level-container.hidden {
+            max-height: 0; opacity: 0; margin: 0; padding: 0;
+        }
+
+        .range-labels {
+            display: flex; justify-content: space-between;
+            font-size: 12px; color: #888; padding: 0 4px;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent;
+            padding: 8px 0;
+        }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 6px; cursor: pointer;
+            background: #3a3a3c; border-radius: 5px; border: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 18px; width: 18px; border-radius: 50%;
+            background: #fff; cursor: pointer;
+            -webkit-appearance: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: all 0.5s ease-out;
+        }
+        input[type=range]::-webkit-slider-thumb:active {
+            transform: scale(1.15);
+            box-shadow: 0 0 12px rgba(255,255,255,0.5);
+        }
+        input[type=range]::-moz-range-track {
+            width: 100%; height: 6px; cursor: pointer;
+            background: #3a3a3c; border-radius: 5px; border: none;
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 18px; width: 18px; border-radius: 50%;
+            background: #fff; cursor: pointer; border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: all 0.5s ease-out;
+        }
+        input[type=range]::-moz-range-thumb:active {
+            transform: scale(1.15);
+            box-shadow: 0 0 12px rgba(255,255,255,0.5);
+        }
+
+        /* --- ПРОФИЛЬ --- */
+        .profile-info {
+            text-align: center; margin-bottom: 20px;
+        }
+        .profile-section {
+            margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .profile-label { font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 4px; }
+        .profile-value { font-size: 24px; font-weight: 700; color: #ffffff; }
+
+        .progress-bar {
+            width: 100%; height: 6px; background: rgba(0,0,0,0.3);
+            border-radius: 3px; margin-top: 8px; overflow: hidden;
+        }
+        .progress-fill { height: 100%; background: #007AFF; width: 0%; transition: width 0.3s ease; }
+
+        /* --- СПИННЕР --- */
+        .loader-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); display: flex;
+            align-items: center; justify-content: center;
+            z-index: 2000; opacity: 1; pointer-events: auto;
+            transition: opacity 0.3s ease;
+        }
+        .loader-overlay.hidden {
+            opacity: 0; pointer-events: none;
+        }
+
+        .spinner {
+            width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.2);
+            border-top: 4px solid #007AFF; border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader-text {
+            position: absolute; bottom: 50px; color: rgba(255,255,255,0.6);
+            font-size: 14px; text-align: center; width: 100%;
+        }
+
+        /* --- АДАПТИВНОСТЬ --- */
         @media (max-width: 480px) {
-            .header { top: 15px; left: 15px; gap: 10px; padding: 6px 12px; font-size: 13px; }
-            .avatar { width: 32px; height: 32px; }
-            .username { font-size: 13px; }
-            .settings-btn { top: 15px; right: 15px; width: 46px; height: 46px; }
-            .gear-icon { width: 22px; height: 22px; }
-            
+            body { padding-bottom: 110px; }
             .counter-container { padding: 8px 20px; margin-bottom: 20px; }
             .counter { font-size: 28px; }
-            
             .click-button { width: 160px; height: 160px; }
             .heart-icon { width: 52px; height: 52px; }
-            
             .stamina-wrapper { width: 180px; margin: 20px 0; }
             .stamina-text { font-size: 13px; }
             .stamina-bar { height: 6px; }
-            
             .upgrades-row { width: 180px; gap: 8px; }
             .upgrade-button { padding: 10px; font-size: 12px; }
-            
             .modal-content { width: 90%; padding: 24px; }
             .modal-title { font-size: 18px; margin-bottom: 20px; }
             .auth-button { padding: 14px; font-size: 15px; }
             .close-btn { padding: 12px; font-size: 14px; }
+            .nav-item { width: 50px; height: 50px; }
+            .nav-item.center { width: 60px; height: 60px; margin-bottom: 20px; }
+            .nav-avatar { width: 45px; height: 45px; }
         }
 
         @media (max-width: 360px) {
@@ -270,11 +343,26 @@
 </head>
 <body>
 
+    <div id="loaderOverlay" class="loader-overlay">
+        <div>
+            <div class="spinner"></div>
+            <div class="loader-text">загрузка...</div>
+        </div>
+    </div>
+
     <div id="authModal" class="modal-overlay active">
         <div class="modal-content">
             <h2 class="modal-title">tapper app</h2>
             <button id="authButton" class="auth-button">войти через tg</button>
             <button id="guestButton" class="close-btn">войти как гость</button>
+        </div>
+    </div>
+
+    <div id="vaultModal" class="modal-overlay vault-modal">
+        <div class="modal-content">
+            <div class="vault-icon">💰</div>
+            <div class="vault-amount">+<span id="vaultAmount">0</span>🤍</div>
+            <button id="vaultClaimBtn" class="auth-button">забрать</button>
         </div>
     </div>
 
@@ -304,25 +392,41 @@
         </div>
     </div>
 
+    <div id="resetConfirmModal" class="modal-overlay">
+        <div class="modal-content" style="padding: 30px;">
+            <h2 class="modal-title" style="color: #ff3b30; margin-bottom: 20px;">⚠️ подтверждение</h2>
+            <p style="text-align: center; color: rgba(255,255,255,0.8); margin-bottom: 20px; font-size: 15px;">
+                вы уверены? все прогрессы будут удалены и не восстановятся!
+            </p>
+            <button id="resetConfirmBtn" class="auth-button" style="background: #ff3b30; margin-bottom: 10px;">да, удалить</button>
+            <button id="resetCancelBtn" class="close-btn">отмена</button>
+        </div>
+    </div>
+
     <div id="profileModal" class="modal-overlay">
         <div class="modal-content">
             <h2 class="modal-title">профиль</h2>
-            <div style="text-align: center; margin-bottom: 20px;">
-                <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                    <div style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 4px;">уровень</div>
-                    <div style="font-size: 24px; font-weight: 700; color: #ffffff;"><span id="profileLevel">1</span>ур.</div>
-                    <div style="width: 100%; height: 6px; background: rgba(0,0,0,0.3); border-radius: 3px; margin-top: 8px; overflow: hidden;">
-                        <div id="profileLevelProgress" style="height: 100%; background: #007AFF; width: 0%; transition: width 0.3s ease;"></div>
+            <div class="profile-info">
+                <div id="profileUsername" style="font-size: 18px; font-weight: 600; margin-bottom: 15px;"></div>
+                
+                <div class="profile-section">
+                    <div class="profile-label">уровень</div>
+                    <div class="profile-value"><span id="profileLevel">1</span>ур.</div>
+                    <div class="progress-bar">
+                        <div id="profileLevelProgress" class="progress-fill"></div>
                     </div>
                 </div>
-                <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                    <div style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 4px;">всего монеток</div>
-                    <div id="profileClickCount" style="font-size: 24px; font-weight: 700; color: #ffffff;">0</div>
+                
+                <div class="profile-section">
+                    <div class="profile-label">всего монеток</div>
+                    <div class="profile-value" id="profileClickCount">0</div>
                 </div>
-                <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                    <div style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 4px;">макс. монеток когда-либо</div>
-                    <div id="profileMaxClicks" style="font-size: 24px; font-weight: 700; color: #ffffff;">0</div>
+                
+                <div class="profile-section">
+                    <div class="profile-label">макс. монеток когда-либо</div>
+                    <div class="profile-value" id="profileMaxClicks">0</div>
                 </div>
+                
                 <div style="font-size: 13px; color: rgba(255,255,255,0.7);">
                     аккаунт создан: <span id="profileCreatedDate" style="color: rgba(255,255,255,0.8);">загрузка...</span>
                 </div>
@@ -331,48 +435,61 @@
         </div>
     </div>
 
-    <div class="header" id="profileHeader" style="cursor: pointer;">
-        <img id="userAvatar" class="avatar" src="https://via.placeholder.com/36">
-        <div id="username" class="username">загрузка...</div>
-    </div>
-
-    <div id="openSettingsBtn" class="settings-btn">
-        <svg class="gear-icon" viewBox="0 0 24 24">
-            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.58 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
-        </svg>
-    </div>
-
-    <div class="counter-container">
-        <div class="counter" id="clickCount">0</div>
-    </div>
-
-    <div class="stamina-wrapper" style="margin-bottom: 15px;">
-        <div class="stamina-text" id="levelText">1ур. / 7ур.</div>
-        <div class="stamina-bar">
-            <div id="levelFill" class="stamina-fill" style="background: linear-gradient(90deg, #007AFF, #00C6FF);"></div>
+    <div class="main-content">
+        <div class="counter-container">
+            <div class="counter" id="clickCount">0</div>
         </div>
-    </div>
 
-    <div class="button-area">
-        <div class="button-border-outer">
-            <div id="clickButton" class="click-button">
-                <svg class="heart-icon" viewBox="0 0 24 24">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                </svg>
+        <div class="stamina-wrapper" style="margin-bottom: 15px;">
+            <div class="stamina-text" id="levelText">1ур. / 7ур.</div>
+            <div class="stamina-bar">
+                <div id="levelFill" class="stamina-fill" style="background: linear-gradient(90deg, #007AFF, #00C6FF);"></div>
             </div>
         </div>
-    </div>
 
-    <div class="stamina-wrapper">
-        <div class="stamina-text" id="staminaText">... / ...</div>
-        <div class="stamina-bar">
-            <div id="staminaFill" class="stamina-fill"></div>
+        <div class="button-area">
+            <div class="button-border-outer">
+                <div id="clickButton" class="click-button">
+                    <svg class="heart-icon" viewBox="0 0 24 24">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="stamina-wrapper">
+            <div class="stamina-text" id="staminaText">... / ...</div>
+            <div class="stamina-bar">
+                <div id="staminaFill" class="stamina-fill"></div>
+            </div>
+        </div>
+
+        <div class="upgrades-row">
+            <button id="upgradeClickBtn" class="upgrade-button">улучшить клик</button>
+            <button id="upgradeStaminaBtn" class="upgrade-button">улучшить стамину</button>
         </div>
     </div>
 
-    <div class="upgrades-row">
-        <button id="upgradeClickBtn" class="upgrade-button">улучшить клик</button>
-        <button id="upgradeStaminaBtn" class="upgrade-button">улучшить стамину</button>
+    <!-- НИЖНЯЯ НАВИГАЦИЯ -->
+    <div class="bottom-nav">
+        <div class="nav-glass"></div>
+        
+        <div id="userAvatarNavBtn" class="nav-item" style="cursor: pointer; position: relative;">
+            <img id="userAvatarNav" class="nav-avatar" src="https://via.placeholder.com/50">
+            <div class="nav-label">профиль</div>
+        </div>
+
+        <div id="clickButtonNav" class="nav-item center" style="position: relative;">
+            <svg class="heart-icon" viewBox="0 0 24 24">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+            <div class="nav-label">тап</div>
+        </div>
+
+        <div id="settingsNavBtn" class="nav-item" style="cursor: pointer; position: relative;">
+            <img src="images/settings.png" class="nav-icon" style="filter: brightness(0) invert(1);">
+            <div class="nav-label">настройки</div>
+        </div>
     </div>
 
     <script>
@@ -383,20 +500,14 @@
             maxClicks: 0, createdDate: new Date().toISOString()
         };
 
-        // НАСТРОЙКИ: по умолчанию включено (true), уровень 'medium'
         let userSettings = JSON.parse(localStorage.getItem('tapper_settings_v2')) || {
             vibration: true,
             vibrationLevel: 'medium'
         };
 
-        const VIBRATION_MAP = {
-            1: 'light',
-            2: 'medium',
-            3: 'heavy'
-        };
+        const VIBRATION_MAP = { 1: 'light', 2: 'medium', 3: 'heavy' };
         const REVERSE_VIBRATION_MAP = { 'light': 1, 'medium': 2, 'heavy': 3 };
 
-        // Новая система цен: 500, 750, 1500, 2500, 5000, 7500, 10000 и т.д.
         function generatePrices(basePrice) {
             const prices = [];
             let price = basePrice;
@@ -416,8 +527,8 @@
         const MAX_CLICKS_PER_TAP = 300;
         const MAX_STAMINA = 300000;
         const RECOVERY_RATE = 1;
+        const OFFLINE_INCOME_INTERVAL = 10; // в секундах
 
-        // Уровни с ценами и цветами
         const LEVEL_SYSTEM = {
             0: { price: 0, color: '#007AFF', name: '1ур.' },
             1: { price: 15000, color: '#9932CC', name: '2ур.' },
@@ -428,15 +539,13 @@
             6: { price: 15000000, color: '#FF0000', name: '7ур.' }
         };
 
-        const btn = document.getElementById('clickButton');
-        let isTouching = false;
-        
-        // Сервер для синхронизации (меняй на свой URL)
         const SERVER_URL = 'http://localhost:3000';
         let userId = null;
         let guestId = localStorage.getItem('guest_id');
+        const btn = document.getElementById('clickButton');
+        let isTouching = false;
+        let vaultReward = 0;
 
-        // Получить ID пользователя
         function getUserId() {
             if (!userId) {
                 const user = tg.initDataUnsafe?.user;
@@ -453,57 +562,36 @@
             return userId;
         }
 
-        // Загрузить данные с сервера
         async function loadFromServer() {
             try {
                 const id = getUserId();
-                if (!id) {
-                    console.log('No user ID, skipping server load');
-                    return null;
-                }
-                
+                if (!id) return null;
                 const response = await fetch(`${SERVER_URL}/api/user/${id}`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
                 });
-                
-                if (!response.ok) {
-                    console.log('Server returned status:', response.status);
-                    return null;
-                }
-                
+                if (!response.ok) return null;
                 const result = await response.json();
-                
                 if (result.success && result.data) {
                     console.log('Loaded from server:', result.data);
                     return result.data;
                 }
             } catch (err) {
-                console.log('Server unavailable, using local data:', err.message);
+                console.log('Server unavailable:', err.message);
             }
             return null;
         }
 
-        // Сохранить данные на сервер
         async function saveToServer(data) {
             try {
                 const id = getUserId();
-                if (!id) {
-                    console.log('No user ID, skipping server save');
-                    return;
-                }
-                
+                if (!id) return;
                 const response = await fetch(`${SERVER_URL}/api/user/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-                
-                if (!response.ok) {
-                    console.log('Server returned status:', response.status);
-                    return;
-                }
-                
+                if (!response.ok) return;
                 const result = await response.json();
                 if (result.success) {
                     console.log('Saved to server');
@@ -519,11 +607,31 @@
                 tg.setHeaderColor('#000000');
             }
             
-            // Попытаемся загрузить данные с сервера
+            const loader = document.getElementById('loaderOverlay');
+            if (loader) loader.classList.remove('hidden');
+            
             const serverData = await loadFromServer();
             if (serverData) {
                 gameState = { ...gameState, ...serverData };
-                console.log('Merged server data with local state');
+                console.log('Merged server data');
+            }
+            
+            if (loader) loader.classList.add('hidden');
+            
+            // Рассчитываем оффлайн заработок
+            const now = Date.now();
+            const passed = (now - gameState.lastSave) / 1000;
+            const offlineIncome = Math.floor((gameState.clickLvl * passed) / OFFLINE_INCOME_INTERVAL);
+            
+            if (offlineIncome > 0) {
+                vaultReward = offlineIncome;
+                gameState.clicks += offlineIncome;
+                if (gameState.clicks > (gameState.maxClicks || 0)) {
+                    gameState.maxClicks = gameState.clicks;
+                }
+                // Показываем модальное окно с заработком
+                document.getElementById('vaultAmount').textContent = offlineIncome;
+                document.getElementById('vaultModal').classList.add('active');
             }
             
             if (localStorage.getItem('auth_done') || (tg.initDataUnsafe && tg.initDataUnsafe.user)) {
@@ -531,32 +639,14 @@
                 loadUser();
             }
 
-            // Инициализация UI настроек
             const toggle = document.getElementById('vibrationToggle');
             const range = document.getElementById('vibrationRange');
             const levelRow = document.getElementById('vibrationLevelRow');
 
             toggle.checked = userSettings.vibration;
             range.value = REVERSE_VIBRATION_MAP[userSettings.vibrationLevel] || 2;
-            
-            if (!userSettings.vibration) {
-                levelRow.classList.add('hidden');
-            }
+            if (!userSettings.vibration) levelRow.classList.add('hidden');
 
-            const now = Date.now();
-            const passed = (now - gameState.lastSave) / 1000;
-            
-            // --- ОФФЛАЙН ЗАРАБОТОК ---
-            // За каждую купленную улучшение клика - 1 клик в минуту (60 секунд)
-            const offlineIncome = Math.floor((gameState.clickLvl * passed) / 60);
-            if (offlineIncome > 0) {
-                gameState.clicks += offlineIncome;
-                if (gameState.clicks > (gameState.maxClicks || 0)) {
-                    gameState.maxClicks = gameState.clicks;
-                }
-            }
-            
-            // Восполнение стамины
             const maxSt = calculateMaxStamina();
             gameState.currentStamina = Math.min(maxSt, gameState.currentStamina + (passed * RECOVERY_RATE));
             
@@ -566,8 +656,8 @@
 
         function loadUser() {
             const user = tg.initDataUnsafe?.user;
-            document.getElementById('username').textContent = user ? (user.username || user.first_name).toLowerCase() : "гость";
-            if (user?.photo_url) document.getElementById('userAvatar').src = user.photo_url;
+            document.getElementById('profileUsername').textContent = user ? (user.username || user.first_name).toLowerCase() : "гость";
+            if (user?.photo_url) document.getElementById('userAvatarNav').src = user.photo_url;
         }
 
         function calculateMaxStamina() {
@@ -593,7 +683,6 @@
             document.getElementById('staminaText').textContent = `${Math.floor(gameState.currentStamina)} / ${maxSt}`;
             document.getElementById('staminaFill').style.width = (gameState.currentStamina / maxSt * 100) + '%';
             
-            // Обновляем прогресс уровня
             const currentLevel = getCurrentLevel();
             const nextLevel = currentLevel + 1;
             const currentLevelPrice = LEVEL_SYSTEM[currentLevel].price;
@@ -615,7 +704,6 @@
             const cPrice = CLICK_PRICES[gameState.clickLvl];
             const sPrice = STAMINA_PRICES[gameState.staminaLvl];
             
-            // Обновляем цвет сердечка в зависимости от уровня
             const levelColor = LEVEL_SYSTEM[currentLevel].color;
             document.querySelector('.heart-icon').style.fill = levelColor;
             
@@ -637,7 +725,6 @@
             gameState.lastSave = Date.now();
             localStorage.setItem('tapper_save_v5', JSON.stringify(gameState));
             
-            // Сохраняем на сервер каждые 10 секунд
             if (Date.now() - lastServerSave > 10000) {
                 saveToServer({
                     clicks: gameState.clicks,
@@ -675,7 +762,6 @@
                 gameState.clicks += val;
                 gameState.currentStamina -= 1;
                 
-                // Обновляем максимум монеток
                 if (gameState.clicks > (gameState.maxClicks || 0)) {
                     gameState.maxClicks = gameState.clicks;
                 }
@@ -690,7 +776,6 @@
                 document.body.appendChild(plus);
                 setTimeout(() => plus.remove(), 700);
 
-                // --- ВИБРАЦИЯ С УЧЕТОМ СИЛЫ ---
                 if (userSettings.vibration && tg.HapticFeedback) {
                     tg.HapticFeedback.impactOccurred(userSettings.vibrationLevel);
                 }
@@ -718,6 +803,10 @@
         window.addEventListener('mousemove', updateTilt);
         window.addEventListener('mouseup', handleEnd);
 
+        // Нижняя навигация - кнопка в центре
+        document.getElementById('clickButtonNav').addEventListener('touchstart', handleStart, { passive: false });
+        document.getElementById('clickButtonNav').addEventListener('mousedown', (e) => { if(!('ontouchstart' in window)) handleStart(e); });
+
         document.getElementById('upgradeClickBtn').onclick = () => {
             const p = CLICK_PRICES[gameState.clickLvl];
             if (p && gameState.clicks >= p && gameState.clickLvl < 300) {
@@ -739,7 +828,6 @@
 
         document.getElementById('authButton').addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('Auth button clicked (early)');
             localStorage.setItem('auth_done', 'true');
             setTimeout(() => window.location.reload(), 100);
         });
@@ -748,35 +836,41 @@
         if (guestBtn) {
             guestBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('Guest button clicked (early)');
                 localStorage.setItem('auth_done', 'true');
                 localStorage.setItem('guest_mode', 'true');
                 setTimeout(() => window.location.reload(), 100);
             });
         }
 
-        // --- ЛОГИКА НАСТРОЕК ---
+        // VAULT - забрать заработок
+        document.getElementById('vaultClaimBtn').onclick = () => {
+            document.getElementById('vaultModal').classList.remove('active');
+            gameState.lastSave = Date.now();
+            localStorage.setItem('tapper_save_v5', JSON.stringify(gameState));
+        };
+
+        // НАВИГАЦИЯ СНИЗУ
+        document.getElementById('userAvatarNavBtn').onclick = () => {
+            updateProfileInfo();
+            document.getElementById('profileModal').classList.add('active');
+        };
+
+        document.getElementById('settingsNavBtn').onclick = () => {
+            document.getElementById('settingsModal').classList.add('active');
+        };
+
+        // НАСТРОЙКИ
         const settingsModal = document.getElementById('settingsModal');
         const vibrationToggle = document.getElementById('vibrationToggle');
         const vibrationRange = document.getElementById('vibrationRange');
         const vibrationLevelRow = document.getElementById('vibrationLevelRow');
 
-        document.getElementById('openSettingsBtn').onclick = () => {
-            settingsModal.classList.add('active');
-        };
-
-        document.getElementById('closeSettings').onclick = () => {
-            settingsModal.classList.remove('active');
-        };
-
         function saveSettings() {
             localStorage.setItem('tapper_settings_v2', JSON.stringify(userSettings));
         }
 
-        // Переключение Вкл/Выкл
         vibrationToggle.onchange = () => {
             userSettings.vibration = vibrationToggle.checked;
-            
             if (userSettings.vibration) {
                 vibrationLevelRow.classList.remove('hidden');
                 if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
@@ -786,44 +880,60 @@
             saveSettings();
         };
 
-        // Изменение силы вибрации
         vibrationRange.oninput = () => {
             const level = VIBRATION_MAP[vibrationRange.value];
             userSettings.vibrationLevel = level;
-            
-            // Демонстрация новой силы вибрации
             if (tg.HapticFeedback && userSettings.vibration) {
                 tg.HapticFeedback.impactOccurred(level);
             }
             saveSettings();
         };
 
+        document.getElementById('resetProgressBtn').onclick = () => {
+            document.getElementById('resetConfirmModal').classList.add('active');
+        };
+
+        document.getElementById('resetConfirmBtn').onclick = () => {
+            gameState = {
+                clicks: 0, clickLvl: 0, staminaLvl: 0, currentStamina: 300,
+                lastSave: Date.now(), maxClicks: 0, createdDate: new Date().toISOString()
+            };
+            localStorage.setItem('tapper_save_v5', JSON.stringify(gameState));
+            updateUI();
+            document.getElementById('resetConfirmModal').classList.remove('active');
+            document.getElementById('settingsModal').classList.remove('active');
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        };
+
+        document.getElementById('resetCancelBtn').onclick = () => {
+            document.getElementById('resetConfirmModal').classList.remove('active');
+        };
+
+        document.getElementById('resetConfirmModal').onclick = (e) => {
+            if (e.target.id === 'resetConfirmModal') {
+                document.getElementById('resetConfirmModal').classList.remove('active');
+            }
+        };
+
+        document.getElementById('closeSettings').onclick = () => {
+            settingsModal.classList.remove('active');
+        };
+
         settingsModal.onclick = (e) => {
             if (e.target === settingsModal) settingsModal.classList.remove('active');
         };
 
-        // --- ПРОФИЛЬ ---
+        // ПРОФИЛЬ
         const profileModal = document.getElementById('profileModal');
-        const profileHeader = document.getElementById('profileHeader');
         
-        function initGameData() {
-            // Инициализируем данные профиля при первом входе
-            if (!gameState.maxClicks) {
-                gameState.maxClicks = gameState.clicks;
-                gameState.createdDate = new Date().toISOString();
-            }
-        }
-
         function updateProfileInfo() {
             const currentLevel = getCurrentLevel();
             const nextLevel = currentLevel + 1;
             const currentLevelPrice = LEVEL_SYSTEM[currentLevel].price;
             const nextLevelPrice = LEVEL_SYSTEM[nextLevel]?.price || LEVEL_SYSTEM[6].price;
             
-            // Обновляем информацию об уровне
             document.getElementById('profileLevel').textContent = (currentLevel + 1);
             
-            // Прогресс до следующего уровня
             let progress = 0;
             if (nextLevel <= 6) {
                 const minClicks = currentLevelPrice;
@@ -838,7 +948,6 @@
             document.getElementById('profileClickCount').textContent = Math.floor(gameState.clicks).toLocaleString();
             document.getElementById('profileMaxClicks').textContent = Math.floor(gameState.maxClicks || 0).toLocaleString();
             
-            // Форматируем дату в формат дд.мм.гггг
             let dateStr = 'неизвестно';
             if (gameState.createdDate) {
                 const date = new Date(gameState.createdDate);
@@ -850,11 +959,6 @@
             document.getElementById('profileCreatedDate').textContent = dateStr;
         }
 
-        profileHeader.onclick = () => {
-            updateProfileInfo();
-            profileModal.classList.add('active');
-        };
-
         document.getElementById('closeProfile').onclick = () => {
             profileModal.classList.remove('active');
         };
@@ -863,33 +967,19 @@
             if (e.target === profileModal) profileModal.classList.remove('active');
         };
 
-        // --- УДАЛЕНИЕ ПРОГРЕССА ---
-        document.getElementById('resetProgressBtn').onclick = () => {
-            const confirmed = confirm('⚠️ вы уверены? все прогрессы будут удалены и не восстановятся!');
-            if (confirmed) {
-                gameState = {
-                    clicks: 0,
-                    clickLvl: 0,
-                    staminaLvl: 0,
-                    currentStamina: 300,
-                    lastSave: Date.now(),
-                    maxClicks: 0,
-                    createdDate: new Date().toISOString()
-                };
-                localStorage.setItem('tapper_save_v5', JSON.stringify(gameState));
-                updateUI();
-                settingsModal.classList.remove('active');
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        // VAULT modal
+        const vaultModal = document.getElementById('vaultModal');
+        vaultModal.onclick = (e) => {
+            if (e.target === vaultModal) {
+                // Не закрываем при клике на фон, только на кнопку
             }
         };
 
-        // Переустанавливаем обработчики кнопок входа в конце
         const authBtn = document.getElementById('authButton');
         
         if (authBtn) {
             authBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('Auth button clicked');
                 localStorage.setItem('auth_done', 'true');
                 setTimeout(() => window.location.reload(), 100);
             });
@@ -898,7 +988,6 @@
         if (guestBtn) {
             guestBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('Guest button clicked');
                 localStorage.setItem('auth_done', 'true');
                 localStorage.setItem('guest_mode', 'true');
                 setTimeout(() => window.location.reload(), 100);
@@ -906,9 +995,7 @@
         }
 
         init();
-        initGameData();
         
-        // Отслеживаем максимум монеток
         setInterval(() => {
             if (gameState.clicks > (gameState.maxClicks || 0)) {
                 gameState.maxClicks = gameState.clicks;
