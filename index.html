@@ -726,7 +726,7 @@
             return 0;
         }
         
-        let lastLevel = 0;
+        let lastLevel = getCurrentLevel();
         
         function checkLevelUp() {
             const currentLevel = getCurrentLevel();
@@ -780,9 +780,10 @@
             const cPrice = CLICK_PRICES[gameState.clickLvl];
             const sPrice = STAMINA_PRICES[gameState.staminaLvl];
             
-            const levelColor = LEVEL_SYSTEM[currentLevel].color;
+            const selectedSkin = HEART_SKINS[userSettings.heartSkin];
+            const heartColor = selectedSkin ? selectedSkin.color : LEVEL_SYSTEM[currentLevel].color;
             const heartIcons = document.querySelectorAll('.heart-icon');
-            heartIcons.forEach(icon => icon.style.fill = levelColor);
+            heartIcons.forEach(icon => icon.style.fill = heartColor);
             
             document.getElementById('upgradeClickBtn').textContent = cPrice ? `улучшить клик (${cPrice})` : "клик макс.";
             document.getElementById('upgradeClickBtn').disabled = !cPrice || gameState.clicks < cPrice;
