@@ -221,8 +221,9 @@
         .vibration-level-container {
             margin-top: -10px; margin-bottom: 20px;
             display: flex; flex-direction: column; gap: 10px;
-            transition: all 0.3s ease; overflow: hidden;
+            transition: all 0.3s ease; overflow: visible;
             max-height: 100px; opacity: 1;
+            padding: 0 2px;
         }
         .vibration-level-container.hidden {
             max-height: 0; opacity: 0; margin: 0; padding: 0;
@@ -235,7 +236,8 @@
 
         input[type=range] {
             -webkit-appearance: none; width: 100%; background: transparent;
-            padding: 8px 0;
+            padding: 6px 0;
+            margin: 0;
         }
         input[type=range]:focus { outline: none; }
         input[type=range]::-webkit-slider-runnable-track {
@@ -243,11 +245,13 @@
             background: #3a3a3c; border-radius: 5px; border: none;
         }
         input[type=range]::-webkit-slider-thumb {
-            height: 18px; width: 18px; border-radius: 50%;
+            height: 16px; width: 16px; border-radius: 50%;
             background: #fff; cursor: pointer;
             -webkit-appearance: none;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             transition: all 0.5s ease-out;
+            margin-top: -5px;
+
         }
         input[type=range]::-webkit-slider-thumb:active {
             transform: scale(1.15);
@@ -258,10 +262,11 @@
             background: #3a3a3c; border-radius: 5px; border: none;
         }
         input[type=range]::-moz-range-thumb {
-            height: 18px; width: 18px; border-radius: 50%;
+            height: 16px; width: 16px; border-radius: 50%;
             background: #fff; cursor: pointer; border: none;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             transition: all 0.5s ease-out;
+            margin-top: -5px;
         }
         input[type=range]::-moz-range-thumb:active {
             transform: scale(1.15);
@@ -563,13 +568,13 @@
 
         // Скины сердечек доступные по уровням
         const HEART_SKINS = {
-            0: { emoji: '❤️', name: 'красное', color: '#FF0000' },
-            1: { emoji: '🧡', name: 'оранжевое', color: '#FFA500' },
-            2: { emoji: '💛', name: 'желтое', color: '#FFFF00' },
-            3: { emoji: '💚', name: 'зеленое', color: '#00AA00' },
-            4: { emoji: '💙', name: 'синее', color: '#0000FF' },
-            5: { emoji: '💜', name: 'фиолетовое', color: '#9932CC' },
-            6: { emoji: '🖤', name: 'черное', color: '#000000' }
+            0: { emoji: '💙', name: 'синий', color: '#0000FF' },
+            1: { emoji: '💜', name: 'фиолетовый', color: '#9932CC' },
+            2: { emoji: '💗', name: 'розовый', color: '#FF1493' },
+            3: { emoji: '💠', name: 'перламутровый', color: '#B0E0E6' },
+            4: { emoji: '🧡', name: 'оранжевый', color: '#FFA500' },
+            5: { emoji: '❤️', name: 'темно красный', color: '#8B0000' },
+            6: { emoji: '❤️', name: 'красный', color: '#FF0000' }
         };
 
         const LEVEL_SYSTEM = {
@@ -733,6 +738,17 @@
         
         function showLevelUpModal(level) {
             document.getElementById('levelUpModal').classList.add('active');
+            
+            const modalTitle = document.querySelector('#levelUpModal .modal-title');
+            const modalText = document.querySelector('#levelUpModal p');
+            
+            if (level === 7) {
+                modalTitle.textContent = 'поздравляем!';
+                modalText.textContent = 'вы достигли максимального уровня!';
+            } else {
+                modalTitle.textContent = 'у тебя новый уровень!';
+                modalText.textContent = 'тебе доступен новый цвет, примерь его в настройках.';
+            }
         }
 
         function updateUI() {
