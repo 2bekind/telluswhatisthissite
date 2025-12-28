@@ -19,10 +19,12 @@
             min-height: 100vh; display: flex; flex-direction: column;
             align-items: center; justify-content: center; overflow: hidden;
             perspective: 800px;
+            position: relative;
         }
 
         /* --- UI Элементы --- */
-        .header {
+        .header { 
+            
             position: absolute; top: 20px; left: 20px;
             display: inline-flex; align-items: center; gap: 12px;
             padding: 8px 16px; background: rgba(255, 255, 255, 0.03);
@@ -69,6 +71,7 @@
             background: #007AFF; color: white; border: none; 
             border-radius: 12px; padding: 16px; width: 100%; 
             font-weight: 600; font-size: 17px; cursor: pointer;
+            position: relative; z-index: 1001;
         }
 
         /* --- Настройки: Тоггл и Слайдер --- */
@@ -114,23 +117,47 @@
 
         input[type=range] {
             -webkit-appearance: none; width: 100%; background: transparent;
+            padding: 8px 0;
         }
         input[type=range]:focus { outline: none; }
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%; height: 6px; cursor: pointer;
             background: #3a3a3c; border-radius: 5px;
+            border: none;
         }
         input[type=range]::-webkit-slider-thumb {
-            height: 22px; width: 22px; border-radius: 50%;
+            height: 18px; width: 18px; border-radius: 50%;
             background: #fff; cursor: pointer;
-            -webkit-appearance: none; margin-top: -8px;
+            -webkit-appearance: none;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: all 0.5s ease-out;
+        }
+        input[type=range]::-webkit-slider-thumb:active {
+            transform: scale(1.15);
+            box-shadow: 0 0 12px rgba(255,255,255,0.5);
+        }
+        input[type=range]::-moz-range-track {
+            width: 100%; height: 6px; cursor: pointer;
+            background: #3a3a3c; border-radius: 5px;
+            border: none;
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 18px; width: 18px; border-radius: 50%;
+            background: #fff; cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: all 0.5s ease-out;
+        }
+        input[type=range]::-moz-range-thumb:active {
+            transform: scale(1.15);
+            box-shadow: 0 0 12px rgba(255,255,255,0.5);
         }
 
         .close-btn {
             background: rgba(255,255,255,0.1); color: white; border: none;
             width: 100%; padding: 14px; border-radius: 12px;
             font-size: 16px; font-weight: 600; margin-top: 10px; cursor: pointer;
+            position: relative; z-index: 1001;
         }
 
         /* --- Основной Интерфейс --- */
@@ -204,6 +231,41 @@
             0% { opacity: 1; transform: translateY(0) scale(1); }
             100% { opacity: 0; transform: translateY(-120px) scale(1.5); }
         }
+
+        /* --- Адаптивность для мобильных --- */
+        @media (max-width: 480px) {
+            .header { top: 15px; left: 15px; gap: 10px; padding: 6px 12px; font-size: 13px; }
+            .avatar { width: 32px; height: 32px; }
+            .username { font-size: 13px; }
+            .settings-btn { top: 15px; right: 15px; width: 46px; height: 46px; }
+            .gear-icon { width: 22px; height: 22px; }
+            
+            .counter-container { padding: 8px 20px; margin-bottom: 20px; }
+            .counter { font-size: 28px; }
+            
+            .click-button { width: 160px; height: 160px; }
+            .heart-icon { width: 52px; height: 52px; }
+            
+            .stamina-wrapper { width: 180px; margin: 20px 0; }
+            .stamina-text { font-size: 13px; }
+            .stamina-bar { height: 6px; }
+            
+            .upgrades-row { width: 180px; gap: 8px; }
+            .upgrade-button { padding: 10px; font-size: 12px; }
+            
+            .modal-content { width: 90%; padding: 24px; }
+            .modal-title { font-size: 18px; margin-bottom: 20px; }
+            .auth-button { padding: 14px; font-size: 15px; }
+            .close-btn { padding: 12px; font-size: 14px; }
+        }
+
+        @media (max-width: 360px) {
+            .counter { font-size: 24px; }
+            .click-button { width: 140px; height: 140px; }
+            .heart-icon { width: 45px; height: 45px; }
+            .stamina-wrapper { width: 160px; margin: 15px 0; }
+            .upgrades-row { width: 160px; }
+        }
     </style>
 </head>
 <body>
@@ -212,15 +274,16 @@
         <div class="modal-content">
             <h2 class="modal-title">tapper app</h2>
             <button id="authButton" class="auth-button">войти через tg</button>
+            <button id="guestButton" class="close-btn">войти как гость</button>
         </div>
     </div>
 
     <div id="settingsModal" class="modal-overlay">
         <div class="modal-content">
-            <h2 class="modal-title">Настройки</h2>
+            <h2 class="modal-title">настройки</h2>
             
             <div class="setting-row">
-                <span class="setting-label">Вибрация</span>
+                <span class="setting-label">вибрация</span>
                 <label class="switch">
                     <input type="checkbox" id="vibrationToggle" checked>
                     <span class="slider"></span>
@@ -229,18 +292,46 @@
 
             <div id="vibrationLevelRow" class="vibration-level-container">
                 <div class="range-labels">
-                    <span>Легкая</span>
-                    <span>Средняя</span>
-                    <span>Сильная</span>
+                    <span>легкая</span>
+                    <span>средняя</span>
+                    <span>сильная</span>
                 </div>
                 <input type="range" id="vibrationRange" min="1" max="3" step="1" value="2">
             </div>
 
-            <button id="closeSettings" class="close-btn">Закрыть</button>
+            <button id="resetProgressBtn" class="close-btn" style="background: #ff3b30; margin-bottom: 10px;">стереть весь прогресс</button>
+            <button id="closeSettings" class="close-btn">закрыть</button>
         </div>
     </div>
 
-    <div class="header">
+    <div id="profileModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="modal-title">профиль</h2>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 4px;">уровень</div>
+                    <div style="font-size: 24px; font-weight: 700; color: #ffffff;"><span id="profileLevel">1</span>ур.</div>
+                    <div style="width: 100%; height: 6px; background: rgba(0,0,0,0.3); border-radius: 3px; margin-top: 8px; overflow: hidden;">
+                        <div id="profileLevelProgress" style="height: 100%; background: #007AFF; width: 0%; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 4px;">всего монеток</div>
+                    <div id="profileClickCount" style="font-size: 24px; font-weight: 700; color: #ffffff;">0</div>
+                </div>
+                <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 4px;">макс. монеток когда-либо</div>
+                    <div id="profileMaxClicks" style="font-size: 24px; font-weight: 700; color: #ffffff;">0</div>
+                </div>
+                <div style="font-size: 13px; color: rgba(255,255,255,0.7);">
+                    аккаунт создан: <span id="profileCreatedDate" style="color: rgba(255,255,255,0.8);">загрузка...</span>
+                </div>
+            </div>
+            <button id="closeProfile" class="close-btn">закрыть</button>
+        </div>
+    </div>
+
+    <div class="header" id="profileHeader" style="cursor: pointer;">
         <img id="userAvatar" class="avatar" src="https://via.placeholder.com/36">
         <div id="username" class="username">загрузка...</div>
     </div>
@@ -253,6 +344,13 @@
 
     <div class="counter-container">
         <div class="counter" id="clickCount">0</div>
+    </div>
+
+    <div class="stamina-wrapper" style="margin-bottom: 15px;">
+        <div class="stamina-text" id="levelText">1ур. / 7ур.</div>
+        <div class="stamina-bar">
+            <div id="levelFill" class="stamina-fill" style="background: linear-gradient(90deg, #007AFF, #00C6FF);"></div>
+        </div>
     </div>
 
     <div class="button-area">
@@ -281,13 +379,14 @@
         const tg = window.Telegram.WebApp;
         
         let gameState = JSON.parse(localStorage.getItem('tapper_save_v5')) || {
-            clicks: 0, clickLvl: 0, staminaLvl: 0, currentStamina: 300, lastSave: Date.now()
+            clicks: 0, clickLvl: 0, staminaLvl: 0, currentStamina: 300, lastSave: Date.now(),
+            maxClicks: 0, createdDate: new Date().toISOString()
         };
 
         // НАСТРОЙКИ: по умолчанию включено (true), уровень 'medium'
         let userSettings = JSON.parse(localStorage.getItem('tapper_settings_v2')) || {
             vibration: true,
-            vibrationLevel: 'medium' // values: 'light', 'medium', 'heavy'
+            vibrationLevel: 'medium'
         };
 
         const VIBRATION_MAP = {
@@ -297,17 +396,134 @@
         };
         const REVERSE_VIBRATION_MAP = { 'light': 1, 'medium': 2, 'heavy': 3 };
 
-        const CLICK_PRICES = [500, 1500, 5000, 15000, 50000];
-        const STAMINA_PRICES = [1000, 3000, 7000, 20000, 60000];
-        const RECOVERY_RATE = 3.33; 
+        // Новая система цен: 500, 750, 1500, 2500, 5000, 7500, 10000 и т.д.
+        function generatePrices(basePrice) {
+            const prices = [];
+            let price = basePrice;
+            for (let i = 0; i < 50; i++) {
+                prices.push(price);
+                if (i % 2 === 0) {
+                    price = Math.round(price * 1.5);
+                } else {
+                    price = Math.round(price * 1.4);
+                }
+            }
+            return prices;
+        }
+
+        const CLICK_PRICES = generatePrices(500);
+        const STAMINA_PRICES = generatePrices(500);
+        const MAX_CLICKS_PER_TAP = 300;
+        const MAX_STAMINA = 300000;
+        const RECOVERY_RATE = 1;
+
+        // Уровни с ценами и цветами
+        const LEVEL_SYSTEM = {
+            0: { price: 0, color: '#007AFF', name: '1ур.' },
+            1: { price: 15000, color: '#9932CC', name: '2ур.' },
+            2: { price: 50000, color: '#FF1493', name: '3ур.' },
+            3: { price: 300000, color: '#00DD88', name: '4ур.' },
+            4: { price: 1000000, color: '#8B0000', name: '5ур.' },
+            5: { price: 3000000, color: '#DC143C', name: '6ур.' },
+            6: { price: 15000000, color: '#FF0000', name: '7ур.' }
+        };
 
         const btn = document.getElementById('clickButton');
         let isTouching = false;
+        
+        // Сервер для синхронизации (меняй на свой URL)
+        const SERVER_URL = 'http://localhost:3000';
+        let userId = null;
+        let guestId = localStorage.getItem('guest_id');
 
-        function init() {
+        // Получить ID пользователя
+        function getUserId() {
+            if (!userId) {
+                const user = tg.initDataUnsafe?.user;
+                if (user?.id) {
+                    userId = 'tg_' + user.id;
+                } else {
+                    if (!guestId) {
+                        guestId = 'guest_' + Math.random().toString(36).substr(2, 9);
+                        localStorage.setItem('guest_id', guestId);
+                    }
+                    userId = guestId;
+                }
+            }
+            return userId;
+        }
+
+        // Загрузить данные с сервера
+        async function loadFromServer() {
+            try {
+                const id = getUserId();
+                if (!id) {
+                    console.log('No user ID, skipping server load');
+                    return null;
+                }
+                
+                const response = await fetch(`${SERVER_URL}/api/user/${id}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (!response.ok) {
+                    console.log('Server returned status:', response.status);
+                    return null;
+                }
+                
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    console.log('Loaded from server:', result.data);
+                    return result.data;
+                }
+            } catch (err) {
+                console.log('Server unavailable, using local data:', err.message);
+            }
+            return null;
+        }
+
+        // Сохранить данные на сервер
+        async function saveToServer(data) {
+            try {
+                const id = getUserId();
+                if (!id) {
+                    console.log('No user ID, skipping server save');
+                    return;
+                }
+                
+                const response = await fetch(`${SERVER_URL}/api/user/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    console.log('Server returned status:', response.status);
+                    return;
+                }
+                
+                const result = await response.json();
+                if (result.success) {
+                    console.log('Saved to server');
+                }
+            } catch (err) {
+                console.log('Could not save to server:', err.message);
+            }
+        }
+
+        async function init() {
             if (tg) {
                 tg.ready(); tg.expand();
                 tg.setHeaderColor('#000000');
+            }
+            
+            // Попытаемся загрузить данные с сервера
+            const serverData = await loadFromServer();
+            if (serverData) {
+                gameState = { ...gameState, ...serverData };
+                console.log('Merged server data with local state');
             }
             
             if (localStorage.getItem('auth_done') || (tg.initDataUnsafe && tg.initDataUnsafe.user)) {
@@ -329,8 +545,21 @@
 
             const now = Date.now();
             const passed = (now - gameState.lastSave) / 1000;
-            const maxSt = 300 + (gameState.staminaLvl * 100);
+            
+            // --- ОФФЛАЙН ЗАРАБОТОК ---
+            // За каждую купленную улучшение клика - 1 клик в минуту (60 секунд)
+            const offlineIncome = Math.floor((gameState.clickLvl * passed) / 60);
+            if (offlineIncome > 0) {
+                gameState.clicks += offlineIncome;
+                if (gameState.clicks > (gameState.maxClicks || 0)) {
+                    gameState.maxClicks = gameState.clicks;
+                }
+            }
+            
+            // Восполнение стамины
+            const maxSt = calculateMaxStamina();
             gameState.currentStamina = Math.min(maxSt, gameState.currentStamina + (passed * RECOVERY_RATE));
+            
             updateUI();
             setInterval(tick, 1000);
         }
@@ -341,30 +570,86 @@
             if (user?.photo_url) document.getElementById('userAvatar').src = user.photo_url;
         }
 
+        function calculateMaxStamina() {
+            return Math.min(MAX_STAMINA, 300 + (gameState.staminaLvl * 100));
+        }
+
+        function calculateClicksPerTap() {
+            return Math.min(MAX_CLICKS_PER_TAP, 1 + gameState.clickLvl);
+        }
+
+        function getCurrentLevel() {
+            for (let i = 6; i >= 0; i--) {
+                if (gameState.clicks >= LEVEL_SYSTEM[i].price) {
+                    return i;
+                }
+            }
+            return 0;
+        }
+
         function updateUI() {
-            const maxSt = 300 + (gameState.staminaLvl * 100);
+            const maxSt = calculateMaxStamina();
             document.getElementById('clickCount').textContent = Math.floor(gameState.clicks).toLocaleString();
             document.getElementById('staminaText').textContent = `${Math.floor(gameState.currentStamina)} / ${maxSt}`;
             document.getElementById('staminaFill').style.width = (gameState.currentStamina / maxSt * 100) + '%';
             
+            // Обновляем прогресс уровня
+            const currentLevel = getCurrentLevel();
+            const nextLevel = currentLevel + 1;
+            const currentLevelPrice = LEVEL_SYSTEM[currentLevel].price;
+            const nextLevelPrice = LEVEL_SYSTEM[nextLevel]?.price || LEVEL_SYSTEM[6].price;
+            
+            let levelProgress = 0;
+            if (nextLevel <= 6) {
+                const minClicks = currentLevelPrice;
+                const maxClicks = nextLevelPrice;
+                levelProgress = ((gameState.clicks - minClicks) / (maxClicks - minClicks)) * 100;
+                levelProgress = Math.max(0, Math.min(100, levelProgress));
+            } else {
+                levelProgress = 100;
+            }
+            
+            document.getElementById('levelText').textContent = `${currentLevel + 1}ур. / 7ур.`;
+            document.getElementById('levelFill').style.width = levelProgress + '%';
+            
             const cPrice = CLICK_PRICES[gameState.clickLvl];
             const sPrice = STAMINA_PRICES[gameState.staminaLvl];
             
-            document.getElementById('upgradeClickBtn').textContent = cPrice ? `улучшить клик (${cPrice})` : "клик макс. lvl";
+            // Обновляем цвет сердечка в зависимости от уровня
+            const levelColor = LEVEL_SYSTEM[currentLevel].color;
+            document.querySelector('.heart-icon').style.fill = levelColor;
+            
+            document.getElementById('upgradeClickBtn').textContent = cPrice ? `улучшить клик (${cPrice})` : "клик макс.";
             document.getElementById('upgradeClickBtn').disabled = !cPrice || gameState.clicks < cPrice;
 
-            document.getElementById('upgradeStaminaBtn').textContent = sPrice ? `улучшить стамину (${sPrice})` : "стамина макс. lvl";
+            document.getElementById('upgradeStaminaBtn').textContent = sPrice ? `улучшить стамину (${sPrice})` : "стамина макс.";
             document.getElementById('upgradeStaminaBtn').disabled = !sPrice || gameState.clicks < sPrice;
         }
 
+        let lastServerSave = Date.now();
+        
         function tick() {
-            const maxSt = 300 + (gameState.staminaLvl * 100);
+            const maxSt = calculateMaxStamina();
             if (gameState.currentStamina < maxSt) {
                 gameState.currentStamina = Math.min(maxSt, gameState.currentStamina + RECOVERY_RATE);
                 updateUI();
             }
             gameState.lastSave = Date.now();
             localStorage.setItem('tapper_save_v5', JSON.stringify(gameState));
+            
+            // Сохраняем на сервер каждые 10 секунд
+            if (Date.now() - lastServerSave > 10000) {
+                saveToServer({
+                    clicks: gameState.clicks,
+                    clickLvl: gameState.clickLvl,
+                    staminaLvl: gameState.staminaLvl,
+                    currentStamina: gameState.currentStamina,
+                    maxClicks: gameState.maxClicks,
+                    createdDate: gameState.createdDate,
+                    lastSave: gameState.lastSave
+                });
+                lastServerSave = Date.now();
+            }
         }
 
         function updateTilt(e) {
@@ -386,9 +671,14 @@
             isTouching = true;
 
             if (gameState.currentStamina >= 1) {
-                const val = 1 + gameState.clickLvl;
+                const val = calculateClicksPerTap();
                 gameState.clicks += val;
                 gameState.currentStamina -= 1;
+                
+                // Обновляем максимум монеток
+                if (gameState.clicks > (gameState.maxClicks || 0)) {
+                    gameState.maxClicks = gameState.clicks;
+                }
                 
                 const t = e.touches ? e.touches[0] : e;
                 const plus = document.createElement('div');
@@ -430,25 +720,40 @@
 
         document.getElementById('upgradeClickBtn').onclick = () => {
             const p = CLICK_PRICES[gameState.clickLvl];
-            if (gameState.clicks >= p) {
-                gameState.clicks -= p; gameState.clickLvl++;
+            if (p && gameState.clicks >= p && gameState.clickLvl < 300) {
+                gameState.clicks -= p;
+                gameState.clickLvl++;
                 updateUI();
             }
         };
 
         document.getElementById('upgradeStaminaBtn').onclick = () => {
             const p = STAMINA_PRICES[gameState.staminaLvl];
-            if (gameState.clicks >= p) {
-                gameState.clicks -= p; gameState.staminaLvl++;
-                gameState.currentStamina = 300 + (gameState.staminaLvl * 100);
+            if (p && gameState.clicks >= p && gameState.staminaLvl < 300) {
+                gameState.clicks -= p;
+                gameState.staminaLvl++;
+                gameState.currentStamina = calculateMaxStamina();
                 updateUI();
             }
         };
 
-        document.getElementById('authButton').onclick = () => {
+        document.getElementById('authButton').addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Auth button clicked (early)');
             localStorage.setItem('auth_done', 'true');
-            location.reload();
-        };
+            setTimeout(() => window.location.reload(), 100);
+        });
+
+        let guestBtn = document.getElementById('guestButton');
+        if (guestBtn) {
+            guestBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Guest button clicked (early)');
+                localStorage.setItem('auth_done', 'true');
+                localStorage.setItem('guest_mode', 'true');
+                setTimeout(() => window.location.reload(), 100);
+            });
+        }
 
         // --- ЛОГИКА НАСТРОЕК ---
         const settingsModal = document.getElementById('settingsModal');
@@ -497,7 +802,119 @@
             if (e.target === settingsModal) settingsModal.classList.remove('active');
         };
 
+        // --- ПРОФИЛЬ ---
+        const profileModal = document.getElementById('profileModal');
+        const profileHeader = document.getElementById('profileHeader');
+        
+        function initGameData() {
+            // Инициализируем данные профиля при первом входе
+            if (!gameState.maxClicks) {
+                gameState.maxClicks = gameState.clicks;
+                gameState.createdDate = new Date().toISOString();
+            }
+        }
+
+        function updateProfileInfo() {
+            const currentLevel = getCurrentLevel();
+            const nextLevel = currentLevel + 1;
+            const currentLevelPrice = LEVEL_SYSTEM[currentLevel].price;
+            const nextLevelPrice = LEVEL_SYSTEM[nextLevel]?.price || LEVEL_SYSTEM[6].price;
+            
+            // Обновляем информацию об уровне
+            document.getElementById('profileLevel').textContent = (currentLevel + 1);
+            
+            // Прогресс до следующего уровня
+            let progress = 0;
+            if (nextLevel <= 6) {
+                const minClicks = currentLevelPrice;
+                const maxClicks = nextLevelPrice;
+                progress = ((gameState.clicks - minClicks) / (maxClicks - minClicks)) * 100;
+                progress = Math.max(0, Math.min(100, progress));
+            } else {
+                progress = 100;
+            }
+            
+            document.getElementById('profileLevelProgress').style.width = progress + '%';
+            document.getElementById('profileClickCount').textContent = Math.floor(gameState.clicks).toLocaleString();
+            document.getElementById('profileMaxClicks').textContent = Math.floor(gameState.maxClicks || 0).toLocaleString();
+            
+            // Форматируем дату в формат дд.мм.гггг
+            let dateStr = 'неизвестно';
+            if (gameState.createdDate) {
+                const date = new Date(gameState.createdDate);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                dateStr = `${day}.${month}.${year}`;
+            }
+            document.getElementById('profileCreatedDate').textContent = dateStr;
+        }
+
+        profileHeader.onclick = () => {
+            updateProfileInfo();
+            profileModal.classList.add('active');
+        };
+
+        document.getElementById('closeProfile').onclick = () => {
+            profileModal.classList.remove('active');
+        };
+
+        profileModal.onclick = (e) => {
+            if (e.target === profileModal) profileModal.classList.remove('active');
+        };
+
+        // --- УДАЛЕНИЕ ПРОГРЕССА ---
+        document.getElementById('resetProgressBtn').onclick = () => {
+            const confirmed = confirm('⚠️ вы уверены? все прогрессы будут удалены и не восстановятся!');
+            if (confirmed) {
+                gameState = {
+                    clicks: 0,
+                    clickLvl: 0,
+                    staminaLvl: 0,
+                    currentStamina: 300,
+                    lastSave: Date.now(),
+                    maxClicks: 0,
+                    createdDate: new Date().toISOString()
+                };
+                localStorage.setItem('tapper_save_v5', JSON.stringify(gameState));
+                updateUI();
+                settingsModal.classList.remove('active');
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            }
+        };
+
+        // Переустанавливаем обработчики кнопок входа в конце
+        const authBtn = document.getElementById('authButton');
+        
+        if (authBtn) {
+            authBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Auth button clicked');
+                localStorage.setItem('auth_done', 'true');
+                setTimeout(() => window.location.reload(), 100);
+            });
+        }
+        
+        if (guestBtn) {
+            guestBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Guest button clicked');
+                localStorage.setItem('auth_done', 'true');
+                localStorage.setItem('guest_mode', 'true');
+                setTimeout(() => window.location.reload(), 100);
+            });
+        }
+
         init();
+        initGameData();
+        
+        // Отслеживаем максимум монеток
+        setInterval(() => {
+            if (gameState.clicks > (gameState.maxClicks || 0)) {
+                gameState.maxClicks = gameState.clicks;
+                localStorage.setItem('tapper_save_v5', JSON.stringify(gameState));
+            }
+        }, 1000);
     </script>
 </body>
 </html>
