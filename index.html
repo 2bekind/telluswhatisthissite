@@ -1108,6 +1108,19 @@
             if (e.target === profileModal) profileModal.classList.remove('active');
         };
 
+        // LEVEL UP MODAL
+        document.getElementById('levelUpCloseBtn').onclick = () => {
+            document.getElementById('levelUpModal').classList.remove('active');
+            initializeSkins();
+        };
+
+        document.getElementById('levelUpModal').onclick = (e) => {
+            if (e.target.id === 'levelUpModal') {
+                document.getElementById('levelUpModal').classList.remove('active');
+                initializeSkins();
+            }
+        };
+
         // VAULT modal
         const vaultModal = document.getElementById('vaultModal');
         vaultModal.onclick = (e) => {
